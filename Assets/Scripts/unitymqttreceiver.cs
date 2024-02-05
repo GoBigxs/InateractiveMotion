@@ -24,7 +24,7 @@ public class UnityMqttReceiver : MonoBehaviour
         // 127.0.0.1 for local server, 192.168.1.100 for on-site server
         // create client instance 
         // Create a new instance of MqttClient
-	client = new MqttClient("tcp://127.0.0.1:1883");
+	    client = new MqttClient("127.0.0.1");
 
 
         // register to message received 
