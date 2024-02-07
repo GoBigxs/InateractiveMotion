@@ -9,6 +9,10 @@ using uPLibrary.Networking.M2Mqtt.Exceptions;
 using System.IO;
 using System.Linq;
 using System;
+using System.Collections.Concurrent;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Unity.VisualScripting;
 
 public class UnityMqttReceiver : MonoBehaviour
 {
@@ -16,6 +20,8 @@ public class UnityMqttReceiver : MonoBehaviour
     [SerializeField]public string LocalReceiveTopic = "sony/ui";
     private String msg;
     private MqttClient client;
+    public HumanController controller;
+    private ConcurrentQueue<System.Action> mainThreadActions = new ConcurrentQueue<System.Action>();
 
     void Awake()
     {
@@ -37,16 +43,45 @@ public class UnityMqttReceiver : MonoBehaviour
         client.Subscribe(new string[] { LocalReceiveTopic }, new byte[] { MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE }); 
     }
 
+    void Update()
+    {
+        // Execute all queued actions on the main thread
+        while (mainThreadActions.TryDequeue(out var action))
+        {
+            action.Invoke();
+        }
+    }
+
 	void Client_MqttMsgPublishReceived(object sender, MqttMsgPublishEventArgs e) 
 	{ 
         msg = System.Text.Encoding.UTF8.GetString(e.Message);
-	    
-	    
+	    var jsonObject = JsonConvert.DeserializeObject<JObject>(msg);
+        var jointsArray = jsonObject["joints"] as JArray;
+
         if (e.Topic == LocalReceiveTopic && msg != null)
         {
-            Debug.Log("Received: " + System.Text.Encoding.UTF8.GetString(e.Message));
-            Debug.Log("Received: " + System.Text.Encoding.UTF8.GetString(e.Message));
+            // Debug.Log("Received: " + System.Text.Encoding.UTF8.GetString(e.Message));
+            // Debug.Log(jointsArray.Count);
+
+            mainThreadActions.Enqueue(() =>
+            {
+                if (controller != null)
+                {
+                    controller.UpdateJointPositions(jointsArray);
+                }
+                else
+                {
+                    Debug.LogError("JointPositionUpdater reference not set in UnityMqttReceiver.");
+                }
+            });
+
         }
+
 	} 
+
+    public string GetLastMessage()
+    {
+        return msg;
+    }
 
 }
