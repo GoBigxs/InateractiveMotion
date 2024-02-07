@@ -30,7 +30,7 @@ public class HumanController : MonoBehaviour
                 Vector3 newPosition = new Vector3(
                     (float)joints[i][0],
                     (float)joints[i][1],
-                    (float)joints[i][2]
+                    -(float)joints[i][2]
                 );
                 Debug.Log(newPosition);
 

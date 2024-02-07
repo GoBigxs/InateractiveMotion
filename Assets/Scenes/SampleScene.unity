@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.4465785, g: 0.49641252, b: 0.574817, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657832, g: 0.49641222, b: 0.57481664, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -237,7 +237,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 12078662}
-  - component: {fileID: 12078661}
   - component: {fileID: 12078663}
   m_Layer: 0
   m_Name: humanmodel
@@ -246,21 +245,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &12078661
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 12078660}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9801ebc7d39114a49b72c392533631b0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  keypointPrefab: {fileID: 0}
-  cubePrefab: {fileID: 0}
-  jsonFilePath: /home/SONY/s7000036356/Downloads/movementShuaiID34587.txt
 --- !u!4 &12078662
 Transform:
   m_ObjectHideFlags: 0
