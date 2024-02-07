@@ -14,14 +14,16 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Unity.VisualScripting;
 
+
 public class UnityMqttReceiver : MonoBehaviour
 {
 
     [SerializeField]public string LocalReceiveTopic = "sony/ui";
-    private String msg;
+    public static string Msg { get; private set; }
     private MqttClient client;
     public HumanController controller;
     private ConcurrentQueue<System.Action> mainThreadActions = new ConcurrentQueue<System.Action>();
+
 
     void Awake()
     {
@@ -29,9 +31,7 @@ public class UnityMqttReceiver : MonoBehaviour
         // Server Setting 
         // 127.0.0.1 for local server, 192.168.1.100 for on-site server
         // create client instance 
-        // Create a new instance of MqttClient
-	    client = new MqttClient("127.0.0.1");
-
+        client = new MqttClient("localhost");
 
         // register to message received 
         client.MqttMsgPublishReceived += Client_MqttMsgPublishReceived; 
@@ -78,6 +78,7 @@ public class UnityMqttReceiver : MonoBehaviour
         }
 
 	} 
+
 
     public string GetLastMessage()
     {
