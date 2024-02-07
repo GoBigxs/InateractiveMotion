@@ -9,8 +9,11 @@ using uPLibrary.Networking.M2Mqtt.Exceptions;
 using System.IO;
 using System.Linq;
 using System;
+using System.Collections.Concurrent;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Unity.VisualScripting;
+
 
 public class UnityMqttReceiver : MonoBehaviour
 {
@@ -18,7 +21,9 @@ public class UnityMqttReceiver : MonoBehaviour
     [SerializeField]public string LocalReceiveTopic = "sony/ui";
     public static string Msg { get; private set; }
     private MqttClient client;
-    public JArray JointsArray { get; private set; }
+    public HumanController controller;
+    private ConcurrentQueue<System.Action> mainThreadActions = new ConcurrentQueue<System.Action>();
+
 
     void Awake()
     {
@@ -38,28 +43,46 @@ public class UnityMqttReceiver : MonoBehaviour
         client.Subscribe(new string[] { LocalReceiveTopic }, new byte[] { MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE }); 
     }
 
+    void Update()
+    {
+        // Execute all queued actions on the main thread
+        while (mainThreadActions.TryDequeue(out var action))
+        {
+            action.Invoke();
+        }
+    }
+
 	void Client_MqttMsgPublishReceived(object sender, MqttMsgPublishEventArgs e) 
 	{ 
-        Msg = System.Text.Encoding.UTF8.GetString(e.Message);
-        // Deserialize the JSON string
-        var jsonObject = JsonConvert.DeserializeObject<JObject>(Msg);
+        msg = System.Text.Encoding.UTF8.GetString(e.Message);
+	    var jsonObject = JsonConvert.DeserializeObject<JObject>(msg);
+        var jointsArray = jsonObject["joints"] as JArray;
 
-        JointsArray = jsonObject["joints"] as JArray;
-
-        // Print out each joint
-        for (int i = 0; i < JointsArray.Count; i++)
+        if (e.Topic == LocalReceiveTopic && msg != null)
         {
-            Console.WriteLine($"joint{i} = {JointsArray[i]}");
+            // Debug.Log("Received: " + System.Text.Encoding.UTF8.GetString(e.Message));
+            // Debug.Log(jointsArray.Count);
+
+            mainThreadActions.Enqueue(() =>
+            {
+                if (controller != null)
+                {
+                    controller.UpdateJointPositions(jointsArray);
+                }
+                else
+                {
+                    Debug.LogError("JointPositionUpdater reference not set in UnityMqttReceiver.");
+                }
+            });
+
         }
-        // Debug.Log("Type of jointsArray: " +jointsArray.GetType());
 
-    }
+	} 
 
-    [Serializable]
-    public class Data
+
+    public string GetLastMessage()
     {
-        public float[][] joints;
+        return msg;
     }
-
 
 }
