@@ -402,6 +402,7 @@
 "Assets/M2MqttUnity/Scripts/BrokerSettings.cs"
 "Assets/M2MqttUnity/Scripts/M2MqttUnityClient.cs"
 "Assets/Scripts/HumanController.cs"
+"Assets/Scripts/NewBehaviourScript.cs"
 "Assets/Scripts/UnityMqttReceiver.cs"
 -langversion:9.0
 
