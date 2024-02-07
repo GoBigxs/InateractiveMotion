@@ -9,13 +9,16 @@ using uPLibrary.Networking.M2Mqtt.Exceptions;
 using System.IO;
 using System.Linq;
 using System;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 public class UnityMqttReceiver : MonoBehaviour
 {
 
     [SerializeField]public string LocalReceiveTopic = "sony/ui";
-    private String msg;
+    public static string Msg { get; private set; }
     private MqttClient client;
+    public JArray JointsArray { get; private set; }
 
     void Awake()
     {
@@ -23,9 +26,7 @@ public class UnityMqttReceiver : MonoBehaviour
         // Server Setting 
         // 127.0.0.1 for local server, 192.168.1.100 for on-site server
         // create client instance 
-        // Create a new instance of MqttClient
-	    client = new MqttClient("127.0.0.1");
-
+        client = new MqttClient("localhost");
 
         // register to message received 
         client.MqttMsgPublishReceived += Client_MqttMsgPublishReceived; 
@@ -39,14 +40,26 @@ public class UnityMqttReceiver : MonoBehaviour
 
 	void Client_MqttMsgPublishReceived(object sender, MqttMsgPublishEventArgs e) 
 	{ 
-        msg = System.Text.Encoding.UTF8.GetString(e.Message);
-	    
-	    
-        if (e.Topic == LocalReceiveTopic && msg != null)
+        Msg = System.Text.Encoding.UTF8.GetString(e.Message);
+        // Deserialize the JSON string
+        var jsonObject = JsonConvert.DeserializeObject<JObject>(Msg);
+
+        JointsArray = jsonObject["joints"] as JArray;
+
+        // Print out each joint
+        for (int i = 0; i < JointsArray.Count; i++)
         {
-            Debug.Log("Received: " + System.Text.Encoding.UTF8.GetString(e.Message));
-            Debug.Log("Received: " + System.Text.Encoding.UTF8.GetString(e.Message));
+            Console.WriteLine($"joint{i} = {JointsArray[i]}");
         }
-	} 
+        // Debug.Log("Type of jointsArray: " +jointsArray.GetType());
+
+    }
+
+    [Serializable]
+    public class Data
+    {
+        public float[][] joints;
+    }
+
 
 }
