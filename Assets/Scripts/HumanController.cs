@@ -29,7 +29,7 @@ public class HumanController : MonoBehaviour
                 // Update the position of the joint GameObject
                 Vector3 newPosition = new Vector3(
                     (float)joints[i][0],
-                    (float)joints[i][1],
+                    -(float)joints[i][1],
                     -(float)joints[i][2]
                 );
                 Debug.Log(newPosition);
