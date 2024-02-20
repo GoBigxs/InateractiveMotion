@@ -19,20 +19,26 @@ public class HumanController : MonoBehaviour
         {
             // Construct the name of the joint GameObject
             string jointName = $"joint{i}";
-            Debug.Log(joints[i][0]);
+            //Debug.Log("i: " + i + ", " + joints[i][0]+ ", " + joints[i][1]+ ", " + joints[i][2]);
 
+ 
             // Find the joint GameObject as a child of 'human'
             Transform jointTransform = transform.Find(jointName);
-
+ 
             if (jointTransform != null)
             {
+                // Define the angle of rotation
+                float rotationAngle = 90f; // Change this angle as needed
+ 
+                Quaternion rotationQuaternion = Quaternion.Euler(-90f, 180f, 180f);
+ 
                 // Update the position of the joint GameObject
-                Vector3 newPosition = new Vector3(
+                Vector3 newPosition = rotationQuaternion * new Vector3(
                     (float)joints[i][0],
-                    -(float)joints[i][1],
-                    -(float)joints[i][2]
+                    (float)joints[i][1],
+                    (float)joints[i][2]
                 );
-                Debug.Log(newPosition);
+                //Debug.Log(newPosition);
 
                 jointTransform.position = newPosition;
             }
