@@ -6,7 +6,8 @@ public class CanvasImageSaver : MonoBehaviour
 {
     public Pen pen; // Reference to the Pen script
     private PenState previousPenState; // Previous state of the pen
-    private int touchCount = 0; // Number of times the pen touches the paper
+    private bool isTouchingPaper = false; // Initialize as not touching paper
+    private int times;    // Number of times the pen touches the paper
     private RawImage rawImage; // Reference to the RawImage component
 
     private void Start()
@@ -25,12 +26,15 @@ public class CanvasImageSaver : MonoBehaviour
         // Check if the pen state has changed from touching to not touching
         if (pen.penState == PenState.Touching && previousPenState == PenState.NotTouching)
         {
-            touchCount++; // Increment the touch count
-            Debug.Log(touchCount);
+            isTouchingPaper = true; // Set the flag to indicate touching paper
+            times++;
+            Debug.Log("Pen is touching paper");
         }
-        else if (pen.penState == PenState.NotTouching && touchCount > 0)
+        else if (pen.penState == PenState.NotTouching && isTouchingPaper)
         {
-            SaveCanvasImage(touchCount); // Save the canvas image when the pen state changes
+            SaveCanvasImage(times); // Save the canvas image when the pen state changes
+            isTouchingPaper = false;
+            Debug.Log("Pen is leaving the paper");
         }
 
         previousPenState = pen.penState;
