@@ -4,15 +4,26 @@ using System.IO;
 
 public class CanvasImageSaver : MonoBehaviour
 {
-    public Pen pen; // Reference to the Pen script
-    private PenState previousPenState; // Previous state of the pen
-    private bool isTouchingPaper = false; // Initialize as not touching paper
-    private int times;    // Number of times the pen touches the paper
+    public Pen[] pens; // Array of references to Pen scripts
+    private PenState[] previousPenStates; // Array to store previous states of the pens
+    private bool[] isTouchingPaper; // Array to track if each pen is touching paper
+    private int[] touchCounts; // Array to store the number of times each pen touches the paper
     private RawImage rawImage; // Reference to the RawImage component
 
     private void Start()
     {
-        previousPenState = pen.penState; // Initialize the previous pen state
+        // Initialize arrays based on the number of pens
+        int numPens = pens.Length;
+        previousPenStates = new PenState[numPens];
+        isTouchingPaper = new bool[numPens];
+        touchCounts = new int[numPens];
+
+        // Initialize previous pen states
+        for (int i = 0; i < numPens; i++)
+        {
+            previousPenStates[i] = pens[i].penState;
+        }
+
         // Find the RawImage component in children
         rawImage = GetComponentInChildren<RawImage>();
         if (rawImage == null)
@@ -23,21 +34,23 @@ public class CanvasImageSaver : MonoBehaviour
 
     private void Update()
     {
-        // Check if the pen state has changed from touching to not touching
-        if (pen.penState == PenState.Touching && previousPenState == PenState.NotTouching)
+        // Update pen states and check for paper touch events for each pen
+        for (int i = 0; i < pens.Length; i++)
         {
-            isTouchingPaper = true; // Set the flag to indicate touching paper
-            times++;
-            Debug.Log("Pen is touching paper");
-        }
-        else if (pen.penState == PenState.NotTouching && isTouchingPaper)
-        {
-            SaveCanvasImage(times); // Save the canvas image when the pen state changes
-            isTouchingPaper = false;
-            Debug.Log("Pen is leaving the paper");
-        }
+            if (pens[i].penState == PenState.Touching && previousPenStates[i] == PenState.NotTouching)
+            {
+                isTouchingPaper[i] = true;
+                touchCounts[i]++;
+            }
+            else if (pens[i].penState == PenState.NotTouching && isTouchingPaper[i])
+            {
+                SaveCanvasImage(touchCounts[i]);
+                isTouchingPaper[i] = false;
+            }
 
-        previousPenState = pen.penState;
+            // Update previous pen state
+            previousPenStates[i] = pens[i].penState;
+        }
     }
 
     private void SaveCanvasImage(int count)
@@ -80,6 +93,6 @@ public class CanvasImageSaver : MonoBehaviour
         // Write the bytes to a file
         File.WriteAllBytes(filePath, bytes);
 
-        Debug.Log($"Image {count} saved to: {filePath}");
+        // Debug.Log($"Image {count} saved to: {filePath}");
     }
 }

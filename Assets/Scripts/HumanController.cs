@@ -27,20 +27,24 @@ public class HumanController : MonoBehaviour
  
             if (jointTransform != null)
             {
-                // Define the angle of rotation
-                float rotationAngle = 90f; // Change this angle as needed
- 
-                Quaternion rotationQuaternion = Quaternion.Euler(-90f, 180f, 180f);
- 
+
+                Quaternion rotationQuaternion = Quaternion.Euler(-90f, 235f, 180f);
                 // Update the position of the joint GameObject
                 Vector3 newPosition = rotationQuaternion * new Vector3(
                     (float)joints[i][0],
                     (float)joints[i][1],
                     (float)joints[i][2]
                 );
+                newPosition.x = -newPosition.x;
                 //Debug.Log(newPosition);
 
                 jointTransform.position = newPosition;
+                // Log the position when i = 7
+                // if (i == 7)
+                // {
+                //     Debug.Log("Position when i = 7: " + newPosition);
+                // }
+
             }
             else
             {
