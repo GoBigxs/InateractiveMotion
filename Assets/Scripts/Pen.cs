@@ -192,14 +192,15 @@ public class Pen : MonoBehaviour
         data.startY = start.y;
         data.endX = end.x;
         data.endY = end.y;
-        //Debug.Log("data.startx " + data.startX + "data.startx " + data.endX);
 
         // Convert data object to JSON
         string jsonData = JsonUtility.ToJson(data);
+
+        // Debug and print the JSON data
         Debug.Log("JSON Data: " + jsonData);
 
         // Create a UnityWebRequest
-        using (UnityWebRequest request = UnityWebRequest.PostWwwForm(serverURL, jsonData))
+        using (UnityWebRequest request = UnityWebRequest.Put(serverURL, jsonData))
         {
             // Set request headers
             request.SetRequestHeader("Content-Type", "application/json");
@@ -219,6 +220,7 @@ public class Pen : MonoBehaviour
             }
         }
     }
+
 
     // Define a class to hold start and end positions
     [System.Serializable]
