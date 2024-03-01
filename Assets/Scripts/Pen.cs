@@ -2,6 +2,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using System;
 using System.Collections.Generic;
+using UnityEngine.Networking;
+using System.Collections;
 
 
 public enum PenState
@@ -126,6 +128,7 @@ public class Pen : MonoBehaviour
                 if (IsPenTouchingPaper(lineRenderer.GetPosition(i - 1)) && IsPenTouchingPaper(lineRenderer.GetPosition(i)))
                 {
                     DrawLine(startPixelUV, endPixelUV, lineWidth);
+                    StartCoroutine(SendDataToServer(startPixelUV, endPixelUV));
                 }
             }
         }
@@ -144,7 +147,7 @@ public class Pen : MonoBehaviour
         // float distance = Mathf.Abs(A * position.x + B * position.y + C * position.z + D) / Mathf.Sqrt(A * A + B * B + C * C);
         // //Debug.Log(distance);
         // // Determine if the point is within the desired area
-        if (position.z>=1.9f)
+        if (position.z>=1.5f)
         {
             //Debug.Log("Point " + point + " is within the desired area.");
             // Return true if the point is within the area
@@ -177,6 +180,63 @@ public class Pen : MonoBehaviour
             DrawSegment(adjustedStart, adjustedEnd, lineWidth);
         }
     }
+
+    private IEnumerator SendDataToServer(Vector2 start, Vector2 end)
+    {
+        // Define the URL of your Python server
+        string serverURL = "http://localhost:5000/receive";
+
+        // Create a data object to hold the start and end positions
+        StartEndPositions data = new StartEndPositions();
+        data.startX = start.x;
+        data.startY = start.y;
+        data.endX = end.x;
+        data.endY = end.y;
+        //Debug.Log("data.startx " + data.startX + "data.startx " + data.endX);
+
+        // Convert data object to JSON
+        string jsonData = JsonUtility.ToJson(data);
+        Debug.Log("JSON Data: " + jsonData);
+
+        // Create a UnityWebRequest
+        using (UnityWebRequest request = UnityWebRequest.PostWwwForm(serverURL, jsonData))
+        {
+            // Set request headers
+            request.SetRequestHeader("Content-Type", "application/json");
+
+            // Send the request
+            yield return request.SendWebRequest();
+
+            // Check for errors
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogError(request.error);
+            }
+            else
+            {
+                Debug.Log("Data sent successfully");
+                Debug.Log(request.downloadHandler.text); // Log the response from the server
+            }
+        }
+    }
+
+    // Define a class to hold start and end positions
+    [System.Serializable]
+    public class StartEndPositions
+    {
+        public float startX;
+        public float startY;
+        public float endX;
+        public float endY;
+    }
+
+    // private IEnumerator SendDataToServer(Vector2 start, Vector2 end)
+    // {
+    //     // Simulate sending data without an actual server
+    //     yield return new WaitForSeconds(1f); // Simulate a delay
+
+    //     Debug.Log("Data sent successfully: " + start + " to " + end);
+    // }
 
 
     private void DrawSegment(Vector2 start, Vector2 end, int lineWidth)
@@ -232,7 +292,7 @@ public class Pen : MonoBehaviour
 
         // Scale the world position by 100 to match the canvas size
         Vector3 scaledPosition = worldPosition * 400f;
-        Debug.Log("world: " + worldPosition + ", scaled: "+ scaledPosition);
+        //Debug.Log("world: " + worldPosition + ", scaled: "+ scaledPosition);
         // Debug.Log("worldPosition: " + worldPosition + ", " + "scaledPosition: " + scaledPosition);
 
 
@@ -243,7 +303,6 @@ public class Pen : MonoBehaviour
 
         return new Vector2(scaledX, scaledY);
     }
-
 
     // Method to clear the canvas texture
     private void ClearCanvas()
