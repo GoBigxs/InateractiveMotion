@@ -121,10 +121,11 @@ public class Pen : MonoBehaviour
 
                 if (IsPenTouchingPaper(lineRenderer.GetPosition(i - 1)) && IsPenTouchingPaper(lineRenderer.GetPosition(i)))
                 {
+
+                    DrawLine(startPixelUV, endPixelUV, lineWidth);
                     // Check if the segment has already been sent
                     if (!sentSegments.Contains(startPixelUV) && !sentSegments.Contains(endPixelUV))
                     {
-                        DrawLine(startPixelUV, endPixelUV, lineWidth);
                         StartCoroutine(SendDataToServer(startPixelUV, endPixelUV));
                         sentSegments.Add(startPixelUV);
                         sentSegments.Add(endPixelUV);
