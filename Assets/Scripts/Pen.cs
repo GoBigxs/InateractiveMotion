@@ -20,13 +20,7 @@ public class Pen : MonoBehaviour
     public Material tipMaterial;             // Material used for the tip of the pen
     [Range(0.01f, 0.1f)]
     public float penWidth = 0.01f;           // Width of the drawn line
-    public float canvas_z = 2.20f;
     public Color penColor = Color.red;       // Color of the pen
-
-    // public Vector3 upperLeft;
-    // public Vector3 bottomLeft;
-    // public Vector3 upperRight;
-    // public Vector3 bottomRight;
     private float pointThreshold = 0.01f;     // distance between points to add to the line
     public RawImage canvasImage;             // Reference to the RawImage component on the canvas
 
@@ -35,7 +29,7 @@ public class Pen : MonoBehaviour
     private LineRenderer currentDrawing;     // Reference to the current LineRenderer component
     private Vector3 previousTipPosition;     // Previous position of the pen tip
     public PenState penState { get; private set; } // Public property to access penState
-
+    private HashSet<Vector2> sentSegments = new HashSet<Vector2>();
     private Texture2D canvasTexture;         // Texture used for drawing on the canvas
     private Color[] canvasColors;            // Array to store colors of the canvas texture
     // private float A, B, C, D;
@@ -127,8 +121,14 @@ public class Pen : MonoBehaviour
 
                 if (IsPenTouchingPaper(lineRenderer.GetPosition(i - 1)) && IsPenTouchingPaper(lineRenderer.GetPosition(i)))
                 {
-                    DrawLine(startPixelUV, endPixelUV, lineWidth);
-                    StartCoroutine(SendDataToServer(startPixelUV, endPixelUV));
+                    // Check if the segment has already been sent
+                    if (!sentSegments.Contains(startPixelUV) && !sentSegments.Contains(endPixelUV))
+                    {
+                        DrawLine(startPixelUV, endPixelUV, lineWidth);
+                        StartCoroutine(SendDataToServer(startPixelUV, endPixelUV));
+                        sentSegments.Add(startPixelUV);
+                        sentSegments.Add(endPixelUV);
+                    }
                 }
             }
         }
@@ -205,13 +205,21 @@ public class Pen : MonoBehaviour
             // Set request headers
             request.SetRequestHeader("Content-Type", "application/json");
 
+            // Set timeout (in seconds)
+            request.timeout = 15; // Adjust timeout duration as needed
+
             // Send the request
             yield return request.SendWebRequest();
 
             // Check for errors
             if (request.result != UnityWebRequest.Result.Success)
             {
+                // Log the error
                 Debug.LogError(request.error);
+                // Retry the request after a delay
+                yield return new WaitForSeconds(1); // Wait for 1 second (for example)
+                StartCoroutine(SendDataToServer(start, end));
+                yield break; // Exit the coroutine
             }
             else
             {

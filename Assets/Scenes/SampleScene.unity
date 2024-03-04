@@ -1051,7 +1051,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &575793182
 Transform:
   m_ObjectHideFlags: 0
@@ -1527,7 +1527,7 @@ MonoBehaviour:
   drawingMaterial: {fileID: 10306, guid: 0000000000000000f000000000000000, type: 0}
   tipMaterial: {fileID: 2100000, guid: 4961bee1238cb67a3b4c7d0762f98f3e, type: 2}
   penWidth: 0.01
-  canvas_z: 1.8
+  canvas_z: 1.5
   penColor: {r: 1, g: 0, b: 0, a: 1}
   canvasImage: {fileID: 639974740}
   lineWidth: 4
