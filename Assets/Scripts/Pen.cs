@@ -37,18 +37,6 @@ public class Pen : MonoBehaviour
     private void Start()
     {
 
-        // Vector3 mid1 = (upperLeft + bottomLeft) / 2f;
-        // Vector3 mid2 = (upperLeft + upperRight) / 2f;
-        // Vector3 mid3 = bottomRight;
-
-        // Vector3 planeNormal = Vector3.Cross(mid2 - mid1, mid3 - mid1).normalized;
-
-        // // Define the plane equation parameters
-        // A = planeNormal.x;
-        // B = planeNormal.y;
-        // C = planeNormal.z;
-        // D = -Vector3.Dot(planeNormal, mid1);
-
         tipMaterial.color = penColor;                // Set the tip color to the specified pen color
         CreateNewLineRenderer();                     // Initialize the LineRenderer object
         previousTipPosition = tip.position;          // Initialize the previous tip position
@@ -126,7 +114,18 @@ public class Pen : MonoBehaviour
                     // Check if the segment has already been sent
                     if (!sentSegments.Contains(startPixelUV) && !sentSegments.Contains(endPixelUV))
                     {
-                        StartCoroutine(SendDataToServer(startPixelUV, endPixelUV));
+                        StartCoroutine(SendDataToServer(startPixelUV, endPixelUV,true));
+                        sentSegments.Add(startPixelUV);
+                        sentSegments.Add(endPixelUV);
+                    }
+                }
+                else
+                {
+                    // Send only pen status without start and end info
+                    // Check if the segment has already been sent
+                    if (!sentSegments.Contains(startPixelUV) && !sentSegments.Contains(endPixelUV))
+                    {
+                        StartCoroutine(SendDataToServer(Vector2.zero, Vector2.zero, false));
                         sentSegments.Add(startPixelUV);
                         sentSegments.Add(endPixelUV);
                     }
@@ -141,14 +140,7 @@ public class Pen : MonoBehaviour
     // Method to check if the pen is touching the paper at a certain point
     private bool IsPenTouchingPaper(Vector3 position)
     {
-        // // Check points against the plane
-        // Vector3[] pointsToCheck = new Vector3[] { upperLeft, bottomLeft, upperRight, bottomRight };
-
-        // // Calculate the distance of the point to the plane
-        // float distance = Mathf.Abs(A * position.x + B * position.y + C * position.z + D) / Mathf.Sqrt(A * A + B * B + C * C);
-        // //Debug.Log(distance);
-        // // Determine if the point is within the desired area
-        if (position.z>=1.5f)
+        if (position.z>=2.1f)
         {
             //Debug.Log("Point " + point + " is within the desired area.");
             // Return true if the point is within the area
@@ -182,7 +174,7 @@ public class Pen : MonoBehaviour
         }
     }
 
-    private IEnumerator SendDataToServer(Vector2 start, Vector2 end)
+    private IEnumerator SendDataToServer(Vector2 start, Vector2 end, bool penTouchingPaper)
     {
         // Define the URL of your Python server
         string serverURL = "http://localhost:5000/receive";
@@ -193,6 +185,8 @@ public class Pen : MonoBehaviour
         data.startY = start.y;
         data.endX = end.x;
         data.endY = end.y;
+        data.penTouchingPaper = penTouchingPaper;
+        
 
         // Convert data object to JSON
         string jsonData = JsonUtility.ToJson(data);
@@ -219,7 +213,7 @@ public class Pen : MonoBehaviour
                 Debug.LogError(request.error);
                 // Retry the request after a delay
                 yield return new WaitForSeconds(1); // Wait for 1 second (for example)
-                StartCoroutine(SendDataToServer(start, end));
+                StartCoroutine(SendDataToServer(start, end, penTouchingPaper));
                 yield break; // Exit the coroutine
             }
             else
@@ -239,16 +233,8 @@ public class Pen : MonoBehaviour
         public float startY;
         public float endX;
         public float endY;
+        public bool penTouchingPaper;
     }
-
-    // private IEnumerator SendDataToServer(Vector2 start, Vector2 end)
-    // {
-    //     // Simulate sending data without an actual server
-    //     yield return new WaitForSeconds(1f); // Simulate a delay
-
-    //     Debug.Log("Data sent successfully: " + start + " to " + end);
-    // }
-
 
     private void DrawSegment(Vector2 start, Vector2 end, int lineWidth)
     {
@@ -302,14 +288,14 @@ public class Pen : MonoBehaviour
     {
 
         // Scale the world position by 100 to match the canvas size
-        Vector3 scaledPosition = worldPosition * 400f;
+        Vector3 scaledPosition = worldPosition * 100f;
         //Debug.Log("world: " + worldPosition + ", scaled: "+ scaledPosition);
-        // Debug.Log("worldPosition: " + worldPosition + ", " + "scaledPosition: " + scaledPosition);
+        //Debug.Log("worldPosition: " + worldPosition + ", " + "scaledPosition: " + scaledPosition);
 
 
         // Assuming your 3D world space is within a certain range, you can scale it to fit the 500x500 canvas
-        float scaledX = Mathf.InverseLerp(-1000f, 1000f, scaledPosition.x) * 512f;
-        float scaledY = Mathf.InverseLerp(-1000f, 1000f, scaledPosition.y) * 512f;
+        float scaledX = Mathf.InverseLerp(-250f, 250f, scaledPosition.x) * 600f;
+        float scaledY = Mathf.InverseLerp(20f, 220f, scaledPosition.y) * 270f;
         // Debug.Log("scaledX: " + scaledX + ", " + "scaledY: " + scaledY);
 
         return new Vector2(scaledX, scaledY);
