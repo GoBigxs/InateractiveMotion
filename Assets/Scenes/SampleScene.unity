@@ -1657,6 +1657,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   LocalReceiveTopic: sony/ui
   controller: {fileID: 12078663}
+  pen: {fileID: 696536686}
 --- !u!4 &925423898
 Transform:
   m_ObjectHideFlags: 0

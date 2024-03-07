@@ -21,8 +21,9 @@ public class UnityMqttReceiver : MonoBehaviour
     private String msg;
     private MqttClient client;
     public HumanController controller;
+    public Pen pen;
     private ConcurrentQueue<System.Action> mainThreadActions = new ConcurrentQueue<System.Action>();
-    //private int jointArrayCount = 0;
+    private int jointArrayCount = 0;
     void Awake()
     {
 
@@ -68,14 +69,30 @@ public class UnityMqttReceiver : MonoBehaviour
                 if (controller != null)
                 {
                     controller.UpdateJointPositions(jointsArray);
-                    //Debug.Log(jointsArray);
+                    //Debug.Log(jointsArray[7]);
                     //Debug.Log("Enqueued jointArray #" + jointArrayCount); // Log the enqueue count
                     //jointArrayCount++; // Increment the counter
+                    // Check if the pen reference is not null
+                    if (pen != null)
+                    {
+                        Vector3 joint =  new Vector3(
+                        (float)jointsArray[7][0],
+                        (float)jointsArray[7][1],
+                        (float)jointsArray[7][2]
+                        );
+                        // Pass the joint positions data to the Pen script
+                        pen.UpdateLinePosition(joint);
+
+                    }
+
                 }
                 else
                 {
                     Debug.LogError("JointPositionUpdater reference not set in UnityMqttReceiver.");
                 }
+
+
+
             });
 
         }
