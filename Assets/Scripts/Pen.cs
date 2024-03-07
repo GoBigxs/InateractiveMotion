@@ -21,11 +21,11 @@ public class Pen : MonoBehaviour
     [Range(0.01f, 0.1f)]
     public float penWidth = 0.01f;           // Width of the drawn line
     public Color penColor = Color.red;       // Color of the pen
-    private float pointThreshold = 0.01f;     // distance between points to add to the line
+    private float pointThreshold = 0.0f;     // distance between points to add to the line
     public RawImage canvasImage;             // Reference to the RawImage component on the canvas
 
     public int lineWidth;                // Width of the drawn line on the canvas
-
+    private List<LineRenderer> activeLineRenderers = new List<LineRenderer>();
     private LineRenderer currentDrawing;     // Reference to the current LineRenderer component
     private Vector3 previousTipPosition;     // Previous position of the pen tip
     public PenState penState { get; private set; } // Public property to access penState
@@ -36,11 +36,9 @@ public class Pen : MonoBehaviour
 
     private void Start()
     {
-
         tipMaterial.color = penColor;                // Set the tip color to the specified pen color
         CreateNewLineRenderer();                     // Initialize the LineRenderer object
         previousTipPosition = tip.position;          // Initialize the previous tip position
-
         // Initialize the canvas texture and colors
         canvasTexture = new Texture2D((int)canvasImage.rectTransform.rect.width, (int)canvasImage.rectTransform.rect.height);
         canvasImage.texture = canvasTexture;
@@ -59,38 +57,61 @@ public class Pen : MonoBehaviour
         // Method to update the state of the pen based on whether it's touching the paper
     private void UpdatePenState()
     {
-        if (IsPenTouchingPaper(tip.position))
-        {
-            penState = PenState.Touching;
-            Debug.Log(penState);
-        }
-        else
-        {
-            penState = PenState.NotTouching;
-            Debug.Log(penState);
-        }
+        penState = IsPenTouchingPaper(tip.position) ? PenState.Touching : PenState.NotTouching;
+        //Debug.Log("tip position : " + tip.position + "penstate : " + penState);
     }
 
     // Method to create a new LineRenderer object
+    // private void CreateNewLineRenderer()
+    // {
+    //     currentDrawing = new GameObject().AddComponent<LineRenderer>(); // Create a new GameObject with a LineRenderer component
+    //     currentDrawing.material = drawingMaterial;                      // Assign the drawing material to the LineRenderer
+    //     currentDrawing.startColor = currentDrawing.endColor = penColor; // Set the start and end color of the line to the pen color
+    //     currentDrawing.startWidth = currentDrawing.endWidth = penWidth; // Set the start and end width of the line
+    //     currentDrawing.positionCount = 1;                               // Set the initial position count to 1
+    //     currentDrawing.SetPosition(0, tip.position);                    // Set the initial position of the line to the tip position 
+    // }
     private void CreateNewLineRenderer()
     {
-        currentDrawing = new GameObject().AddComponent<LineRenderer>(); // Create a new GameObject with a LineRenderer component
-        currentDrawing.material = drawingMaterial;                      // Assign the drawing material to the LineRenderer
-        currentDrawing.startColor = currentDrawing.endColor = penColor; // Set the start and end color of the line to the pen color
-        currentDrawing.startWidth = currentDrawing.endWidth = penWidth; // Set the start and end width of the line
-        currentDrawing.positionCount = 1;                               // Set the initial position count to 1
-        currentDrawing.SetPosition(0, tip.position);                    // Set the initial position of the line to the tip position 
+        GameObject newLineObject = new GameObject();
+        LineRenderer newLineRenderer = newLineObject.AddComponent<LineRenderer>();
+        newLineRenderer.material = drawingMaterial;
+        newLineRenderer.startColor = newLineRenderer.endColor = penColor;
+        newLineRenderer.startWidth = newLineRenderer.endWidth = penWidth;
+        newLineRenderer.positionCount = 1;
+        newLineRenderer.SetPosition(0, tip.position);
+
+        // Add the newly created LineRenderer to the list of active LineRenderers
+        activeLineRenderers.Add(newLineRenderer);
     }
 
     // Method to update the position of the line based on the pen tip's movement
+    // private void UpdateLinePosition()
+    // {
+    //     float distance = Vector3.Distance(previousTipPosition, tip.position);
+    //     //Debug.Log(tip.position);
+    //     if (distance > 0.0f)
+    //     {
+    //         // Debug.Log(distance);
+    //         currentDrawing.positionCount++;
+    //         //Debug.Log(currentDrawing.positionCount);
+    //         currentDrawing.SetPosition(currentDrawing.positionCount - 1, tip.position);
+
+    //         previousTipPosition = tip.position;
+    //     }
+    // }
     private void UpdateLinePosition()
     {
         float distance = Vector3.Distance(previousTipPosition, tip.position);
-        if (distance > pointThreshold)
+        if (distance > 0.0f)
         {
-            // Debug.Log(distance);
-            currentDrawing.positionCount++;
-            currentDrawing.SetPosition(currentDrawing.positionCount - 1, tip.position);
+            // Iterate over all active LineRenderers and update their positions
+            foreach (LineRenderer lineRenderer in activeLineRenderers)
+            {
+                lineRenderer.positionCount++;
+                lineRenderer.SetPosition(lineRenderer.positionCount - 1, tip.position);
+            }
+
             previousTipPosition = tip.position;
         }
     }
@@ -98,34 +119,39 @@ public class Pen : MonoBehaviour
     // Method to update the canvas texture with the drawn lines
     private void UpdateCanvasTexture()
     {
-        ClearCanvas(); // Clear the canvas texture
-        foreach (var lineRenderer in FindObjectsOfType<LineRenderer>())
-        {
-            for (int i = 1; i < lineRenderer.positionCount; i++)
-            {
-                Vector2 startPixelUV = WorldToCanvasPoint(lineRenderer.GetPosition(i - 1));
-                Vector2 endPixelUV = WorldToCanvasPoint(lineRenderer.GetPosition(i));
-                // Debug.Log("linepos " + lineRenderer.GetPosition(i).z);
+        if (activeLineRenderers.Count == 0)
+            ClearCanvas();
 
-                if (IsPenTouchingPaper(lineRenderer.GetPosition(i - 1)) && IsPenTouchingPaper(lineRenderer.GetPosition(i)))
+        foreach (LineRenderer lineRenderer in activeLineRenderers)
+        {
+            int startPositionIndex = Mathf.Max(lineRenderer.positionCount - 2, 0); // Start from the second-to-last point
+            for (int i = startPositionIndex; i < lineRenderer.positionCount - 1; i++)
+            {
+                Vector2 startPixelUV = WorldToCanvasPoint(lineRenderer.GetPosition(i));
+                Vector2 endPixelUV = WorldToCanvasPoint(lineRenderer.GetPosition(i + 1));
+                //Debug.Log("start: " + startPixelUV + "end: "+ endPixelUV);
+
+                if (IsPenTouchingPaper(lineRenderer.GetPosition(i)) && IsPenTouchingPaper(lineRenderer.GetPosition(i + 1)))
                 {
 
                     DrawLine(startPixelUV, endPixelUV, lineWidth);
+                    //StartCoroutine(SendDataToServer(lineRenderer.GetPosition(i), lineRenderer.GetPosition(i + 1),true));
                     // Check if the segment has already been sent
                     if (!sentSegments.Contains(startPixelUV) && !sentSegments.Contains(endPixelUV))
                     {
-                        StartCoroutine(SendDataToServer(startPixelUV, endPixelUV,true));
+                        StartCoroutine(SendDataToServer(lineRenderer.GetPosition(i), lineRenderer.GetPosition(i + 1),true));
                         sentSegments.Add(startPixelUV);
                         sentSegments.Add(endPixelUV);
                     }
                 }
                 else
                 {
+                    //StartCoroutine(SendDataToServer(lineRenderer.GetPosition(i), lineRenderer.GetPosition(i + 1), false));
                     // Send only pen status without start and end info
                     // Check if the segment has already been sent
                     if (!sentSegments.Contains(startPixelUV) && !sentSegments.Contains(endPixelUV))
                     {
-                        StartCoroutine(SendDataToServer(Vector2.zero, Vector2.zero, false));
+                        StartCoroutine(SendDataToServer(lineRenderer.GetPosition(i), lineRenderer.GetPosition(i + 1), false));
                         sentSegments.Add(startPixelUV);
                         sentSegments.Add(endPixelUV);
                     }
@@ -140,7 +166,7 @@ public class Pen : MonoBehaviour
     // Method to check if the pen is touching the paper at a certain point
     private bool IsPenTouchingPaper(Vector3 position)
     {
-        if (position.z>=2.1f)
+        if (position.z>=1.9f)
         {
             //Debug.Log("Point " + point + " is within the desired area.");
             // Return true if the point is within the area
@@ -192,7 +218,7 @@ public class Pen : MonoBehaviour
         string jsonData = JsonUtility.ToJson(data);
 
         // Debug and print the JSON data
-        Debug.Log("JSON Data: " + jsonData);
+        //Debug.Log("JSON Data: " + jsonData);
 
         // Create a UnityWebRequest
         using (UnityWebRequest request = UnityWebRequest.Put(serverURL, jsonData))
@@ -201,7 +227,7 @@ public class Pen : MonoBehaviour
             request.SetRequestHeader("Content-Type", "application/json");
 
             // Set timeout (in seconds)
-            request.timeout = 15; // Adjust timeout duration as needed
+            //request.timeout = 15; // Adjust timeout duration as needed
 
             // Send the request
             yield return request.SendWebRequest();
@@ -211,10 +237,10 @@ public class Pen : MonoBehaviour
             {
                 // Log the error
                 Debug.LogError(request.error);
-                // Retry the request after a delay
-                yield return new WaitForSeconds(1); // Wait for 1 second (for example)
-                StartCoroutine(SendDataToServer(start, end, penTouchingPaper));
-                yield break; // Exit the coroutine
+                // // Retry the request after a delay
+                // yield return new WaitForSeconds(1); // Wait for 1 second (for example)
+                // StartCoroutine(SendDataToServer(start, end, penTouchingPaper));
+                // yield break; // Exit the coroutine
             }
             else
             {
@@ -288,7 +314,7 @@ public class Pen : MonoBehaviour
     {
 
         // Scale the world position by 100 to match the canvas size
-        Vector3 scaledPosition = worldPosition * 100f;
+        Vector3 scaledPosition = worldPosition * 100;
         //Debug.Log("world: " + worldPosition + ", scaled: "+ scaledPosition);
         //Debug.Log("worldPosition: " + worldPosition + ", " + "scaledPosition: " + scaledPosition);
 
@@ -296,6 +322,8 @@ public class Pen : MonoBehaviour
         // Assuming your 3D world space is within a certain range, you can scale it to fit the 500x500 canvas
         float scaledX = Mathf.InverseLerp(-250f, 250f, scaledPosition.x) * 600f;
         float scaledY = Mathf.InverseLerp(20f, 220f, scaledPosition.y) * 270f;
+        //float scaledX = scaledPosition.x;
+        //float scaledY = scaledPosition.y;
         // Debug.Log("scaledX: " + scaledX + ", " + "scaledY: " + scaledY);
 
         return new Vector2(scaledX, scaledY);

@@ -22,7 +22,7 @@ public class UnityMqttReceiver : MonoBehaviour
     private MqttClient client;
     public HumanController controller;
     private ConcurrentQueue<System.Action> mainThreadActions = new ConcurrentQueue<System.Action>();
-
+    //private int jointArrayCount = 0;
     void Awake()
     {
 
@@ -68,6 +68,9 @@ public class UnityMqttReceiver : MonoBehaviour
                 if (controller != null)
                 {
                     controller.UpdateJointPositions(jointsArray);
+                    //Debug.Log(jointsArray);
+                    //Debug.Log("Enqueued jointArray #" + jointArrayCount); // Log the enqueue count
+                    //jointArrayCount++; // Increment the counter
                 }
                 else
                 {

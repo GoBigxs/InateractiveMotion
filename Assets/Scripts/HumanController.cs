@@ -9,7 +9,8 @@ using Newtonsoft.Json.Linq;
 public class HumanController : MonoBehaviour
 {
     // Assuming this script is attached to the 'human' GameObject
-    // which has the 14 joint sub-GameObjects as children.
+    // // which has the 14 joint sub-GameObjects as children.
+    // private int jointArrayCount = 1;
 
     // Method to call when a new JSON message is received
     public void UpdateJointPositions(JArray joints)
@@ -37,13 +38,20 @@ public class HumanController : MonoBehaviour
                 );
                 newPosition.x = -newPosition.x;
                 //Debug.Log(newPosition);
-
-                jointTransform.position = newPosition;
+                Vector3 newPosition1 = new Vector3(
+                    (float)joints[i][0],
+                    (float)joints[i][1],
+                    (float)joints[i][2]
+                );
+                jointTransform.position = newPosition1;
                 // Log the position when i = 7
                 // if (i == 7)
                 // {
                 //     Debug.Log("Position when i = 7: " + newPosition);
+                //     Debug.Log("Enqueued jointArray #" + jointArrayCount); // Log the enqueue count
+                //     jointArrayCount++; // Increment the counter
                 // }
+
 
             }
             else
