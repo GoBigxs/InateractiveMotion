@@ -38,12 +38,16 @@ public class HumanController : MonoBehaviour
                 );
                 newPosition.x = -newPosition.x;
                 //Debug.Log(newPosition);
+
+                // newPosition1 is only for Debug purpose
                 Vector3 newPosition1 = new Vector3(
                     (float)joints[i][0],
                     (float)joints[i][1],
                     (float)joints[i][2]
                 );
-                jointTransform.position = newPosition1;
+                // =======================================
+
+                jointTransform.position = newPosition;
                 // Log the position when i = 7
                 // if (i == 7)
                 // {
@@ -59,6 +63,13 @@ public class HumanController : MonoBehaviour
                 Debug.LogWarning($"Joint '{jointName}' not found.");
             }
         }
+    }
+
+    public Vector3 GetJoint(int i)
+    {
+        string jointName = $"joint{i}";
+        Transform jointTransform = transform.Find(jointName);
+        return jointTransform.position;
     }
 
     // Define a class to match the structure of your JSON data

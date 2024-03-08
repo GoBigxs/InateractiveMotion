@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.44657832, g: 0.49641222, b: 0.57481664, a: 1}
+  m_IndirectSpecularColor: {r: 0.4465785, g: 0.49641252, b: 0.574817, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -1292,7 +1292,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &696536681
 Transform:
   m_ObjectHideFlags: 0
@@ -1415,12 +1415,11 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 696536680}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e07da7003e4b816a7bfdd09b31d2005d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tip: {fileID: 1108534985}
   drawingMaterial: {fileID: 10306, guid: 0000000000000000f000000000000000, type: 0}
   tipMaterial: {fileID: 2100000, guid: 4961bee1238cb67a3b4c7d0762f98f3e, type: 2}
   penWidth: 0.01
@@ -2026,7 +2025,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e07da7003e4b816a7bfdd09b31d2005d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tip: {fileID: 1892244734}
   drawingMaterial: {fileID: 10306, guid: 0000000000000000f000000000000000, type: 0}
   tipMaterial: {fileID: 2100000, guid: 4961bee1238cb67a3b4c7d0762f98f3e, type: 2}
   penWidth: 0.01
@@ -2131,6 +2129,56 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1461608209}
   m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &1527729324
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1527729326}
+  - component: {fileID: 1527729325}
+  m_Layer: 0
+  m_Name: Pen
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1527729325
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1527729324}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e07da7003e4b816a7bfdd09b31d2005d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  drawingMaterial: {fileID: 10306, guid: 0000000000000000f000000000000000, type: 0}
+  tipMaterial: {fileID: 2100000, guid: 4961bee1238cb67a3b4c7d0762f98f3e, type: 2}
+  penWidth: 0.01
+  penColor: {r: 1, g: 0, b: 0, a: 1}
+  canvasImage: {fileID: 639974740}
+  lineWidth: 2
+--- !u!4 &1527729326
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1527729324}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1558311381
 GameObject:
   m_ObjectHideFlags: 0
@@ -2763,6 +2811,7 @@ SceneRoots:
   - {fileID: 963194228}
   - {fileID: 705507995}
   - {fileID: 12078662}
+  - {fileID: 1527729326}
   - {fileID: 925423898}
   - {fileID: 1858884407}
   - {fileID: 649111481}

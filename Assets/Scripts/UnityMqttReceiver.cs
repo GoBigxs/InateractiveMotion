@@ -23,7 +23,7 @@ public class UnityMqttReceiver : MonoBehaviour
     public HumanController controller;
     public Pen pen;
     private ConcurrentQueue<System.Action> mainThreadActions = new ConcurrentQueue<System.Action>();
-    private int jointArrayCount = 0;
+    //private int jointArrayCount = 0;
     void Awake()
     {
 
@@ -75,13 +75,11 @@ public class UnityMqttReceiver : MonoBehaviour
                     // Check if the pen reference is not null
                     if (pen != null)
                     {
-                        Vector3 joint =  new Vector3(
-                        (float)jointsArray[7][0],
-                        (float)jointsArray[7][1],
-                        (float)jointsArray[7][2]
-                        );
+
+                        Vector3 joint = controller.GetJoint(7);
                         // Pass the joint positions data to the Pen script
                         pen.UpdateLinePosition(joint);
+                        pen.UpdateCanvasTexture();
 
                     }
 
