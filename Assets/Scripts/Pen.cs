@@ -24,7 +24,7 @@ public class Pen : MonoBehaviour
     public float penWidth = 0.01f;           // Width of the drawn line
     public Color penColor = Color.red;       // Color of the pen
 
-    public RawImage canvasImage;             // Reference to the RawImage component on the canvas
+    // public RawImage canvasImage;             // Reference to the RawImage component on the canvas
 
     public int lineWidth;                // Width of the drawn line on the canvas
     private LineRenderer currentDrawing;     // Reference to the current LineRenderer component
@@ -34,16 +34,21 @@ public class Pen : MonoBehaviour
     private Color[] canvasColors;            // Array to store colors of the canvas texture
     private int prevPositionCnt = 0;
 
+    public string side = "Left";
+
     private void Start()
     {
         tipMaterial.color = penColor;                // Set the tip color to the specified pen color
         CreateNewLineRenderer();                     // Initialize the LineRenderer object
         previousTipPosition = new Vector3(0.0f, 0.0f, 0.0f);          // Initialize the previous tip position
         // Initialize the canvas texture and colors
-        canvasTexture = new Texture2D((int)canvasImage.rectTransform.rect.width, (int)canvasImage.rectTransform.rect.height);
-        canvasImage.texture = canvasTexture;
-        canvasColors = new Color[canvasTexture.width * canvasTexture.height];
-        ClearCanvas();
+        // canvasTexture = new Texture2D((int)canvasImage.rectTransform.rect.width, (int)canvasImage.rectTransform.rect.height);
+        // canvasImage.texture = canvasTexture;
+        // canvasColors = new Color[canvasTexture.width * canvasTexture.height];
+
+        canvasTexture = DrawingManager.Instance.GetCanvasTexture();
+        canvasColors = DrawingManager.Instance.GetCanvasColors();
+        // ClearCanvas();
     }
 
 
@@ -64,7 +69,7 @@ public class Pen : MonoBehaviour
     // Method to create a new LineRenderer object
     private void CreateNewLineRenderer()
     {
-        currentDrawing = new GameObject().AddComponent<LineRenderer>(); // Create a new GameObject with a LineRenderer component
+        currentDrawing = new GameObject(side).AddComponent<LineRenderer>(); // Create a new GameObject with a LineRenderer component
         currentDrawing.material = drawingMaterial;                      // Assign the drawing material to the LineRenderer
         currentDrawing.startColor = currentDrawing.endColor = penColor; // Set the start and end color of the line to the pen color
         currentDrawing.startWidth = currentDrawing.endWidth = penWidth; // Set the start and end width of the line
@@ -78,7 +83,6 @@ public class Pen : MonoBehaviour
     {
         // tip.position = joint;
         float distance = Vector3.Distance(previousTipPosition, joint);
-        Debug.Log(joint);
         if (distance > 0.0f)
         {
             // Debug.Log(distance);
@@ -122,8 +126,9 @@ public class Pen : MonoBehaviour
         }
 
 
-        canvasTexture.SetPixels(canvasColors);
-        canvasTexture.Apply();
+        // canvasTexture.SetPixels(canvasColors);
+        // canvasTexture.Apply();
+        DrawingManager.Instance.UpdateCanvas(canvasColors);
     }
 
 
@@ -162,6 +167,7 @@ public class Pen : MonoBehaviour
             // Draw the additional segment
             DrawSegment(adjustedStart, adjustedEnd, lineWidth);
         }
+        Debug.Log("Line drawed");
     }
 
     private IEnumerator SendDataToServer(int i, float z1, float z2, Vector2 start, Vector2 end, bool penTouchingPaper)
@@ -211,8 +217,8 @@ public class Pen : MonoBehaviour
             }
             else
             {
-                Debug.Log("Data sent successfully");
-                Debug.Log(request.downloadHandler.text); // Log the response from the server
+                // Debug.Log("Data sent successfully");
+                // Debug.Log(request.downloadHandler.text); // Log the response from the server
             }
         }
     }
