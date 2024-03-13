@@ -22,7 +22,7 @@ public class Pen : MonoBehaviour
     public Material tipMaterial;             // Material used for the tip of the pen
     [Range(0.01f, 0.1f)]
     public float penWidth = 0.01f;           // Width of the drawn line
-    public Color penColor = Color.red;       // Color of the pen
+    private Color penColor;       // Color of the pen
 
     // public RawImage canvasImage;             // Reference to the RawImage component on the canvas
 
@@ -33,11 +33,27 @@ public class Pen : MonoBehaviour
     private Texture2D canvasTexture;         // Texture used for drawing on the canvas
     private Color[] canvasColors;            // Array to store colors of the canvas texture
     private int prevPositionCnt = 0;
+    private DrawingManager DrawingManager; // Reference to the DrawingManager component
+    private List<Color> colorList = new List<Color>();
 
     public string side = "Left";
 
-    private void Start()
+    private void Awake()
     {
+
+
+        // Add colors to the list
+        colorList.Add(Color.red);
+        colorList.Add(Color.blue);
+        colorList.Add(Color.green);
+        colorList.Add(Color.yellow);
+        colorList.Add(Color.cyan);
+        // Get a random color from the list
+        Color randomColor = GetRandomColor();
+
+        // Do something with the random color (e.g., assign it to a variable)
+        penColor = randomColor;
+        
         tipMaterial.color = penColor;                // Set the tip color to the specified pen color
         CreateNewLineRenderer();                     // Initialize the LineRenderer object
         previousTipPosition = new Vector3(0.0f, 0.0f, 0.0f);          // Initialize the previous tip position
@@ -48,6 +64,7 @@ public class Pen : MonoBehaviour
 
         canvasTexture = DrawingManager.Instance.GetCanvasTexture();
         canvasColors = DrawingManager.Instance.GetCanvasColors();
+        Debug.Log("currentDrawing is null: " + (currentDrawing));
         // ClearCanvas();
     }
 
@@ -69,6 +86,7 @@ public class Pen : MonoBehaviour
     // Method to create a new LineRenderer object
     private void CreateNewLineRenderer()
     {
+
         currentDrawing = new GameObject(side).AddComponent<LineRenderer>(); // Create a new GameObject with a LineRenderer component
         currentDrawing.material = drawingMaterial;                      // Assign the drawing material to the LineRenderer
         currentDrawing.startColor = currentDrawing.endColor = penColor; // Set the start and end color of the line to the pen color
@@ -83,6 +101,7 @@ public class Pen : MonoBehaviour
     {
         // tip.position = joint;
         float distance = Vector3.Distance(previousTipPosition, joint);
+        Debug.Log(previousTipPosition);
         if (distance > 0.0f)
         {
             // Debug.Log(distance);
@@ -99,7 +118,7 @@ public class Pen : MonoBehaviour
 
 
     // Method to update the canvas texture with the drawn lines
-    public void UpdateCanvasTexture()
+    public void UpdateCanvasTexture(int id)
     {
 
         LineRenderer lineRenderer = currentDrawing; // Assuming you have only one LineRenderer
@@ -143,7 +162,20 @@ public class Pen : MonoBehaviour
         }
         return false;
     }
+    
+    // Function to get a random color from the list
+    private Color GetRandomColor()
+    {
+        if (colorList.Count == 0)
+        {
+            Debug.LogWarning("Color list is empty!");
+            return Color.white;
+        }
 
+        int randomIndex = UnityEngine.Random.Range(0, colorList.Count);
+
+        return colorList[randomIndex];
+    }
 
     private void DrawLine(Vector2 start, Vector2 end, int lineWidth)
     {
