@@ -77,7 +77,7 @@ public class Pen : MonoBehaviour
     // }
 
         // Method to update the state of the pen based on whether it's touching the paper
-    // private void UpdatePenS HumanController controller;tate()
+    // private void UpdatePenState()
     // {
     //     penState = IsPenTouchingPaper(tip.position) ? PenState.Touching : PenState.NotTouching;
     //     //Debug.Log("tip position : " + tip.position + "penstate : " + penState);

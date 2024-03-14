@@ -123,6 +123,17 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!114 &12078663 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5280494616534573523, guid: 862c77a0096561bc387226d70c275f95, type: 3}
+  m_PrefabInstance: {fileID: 851846974137987857}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0680387275f31ac5fa2d95cf1b0f5083, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &70957570
 GameObject:
   m_ObjectHideFlags: 0
@@ -524,7 +535,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LocalReceiveTopic: sony/ui
-  controller: {fileID: 0}
+  controller: {fileID: 12078663}
   controllerPrefab: {fileID: 8815910897921651553, guid: 862c77a0096561bc387226d70c275f95, type: 3}
 --- !u!4 &925423898
 Transform:
