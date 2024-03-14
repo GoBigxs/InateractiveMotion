@@ -64,8 +64,7 @@ public class Pen : MonoBehaviour
 
         canvasTexture = DrawingManager.Instance.GetCanvasTexture();
         canvasColors = DrawingManager.Instance.GetCanvasColors();
-        Debug.Log("currentDrawing is null: " + (currentDrawing));
-        // ClearCanvas();
+        //Debug.Log("currentDrawing is null: " + (currentDrawing));
     }
 
 
@@ -101,7 +100,7 @@ public class Pen : MonoBehaviour
     {
         // tip.position = joint;
         float distance = Vector3.Distance(previousTipPosition, joint);
-        Debug.Log(previousTipPosition);
+        //Debug.Log(previousTipPosition);
         if (distance > 0.0f)
         {
             // Debug.Log(distance);
@@ -199,7 +198,7 @@ public class Pen : MonoBehaviour
             // Draw the additional segment
             DrawSegment(adjustedStart, adjustedEnd, lineWidth);
         }
-        Debug.Log("Line drawed");
+
     }
 
     private IEnumerator SendDataToServer(int i, float z1, float z2, Vector2 start, Vector2 end, bool penTouchingPaper)
@@ -337,14 +336,6 @@ public class Pen : MonoBehaviour
         return new Vector2(scaledX, scaledY);
     }
 
-    // Method to clear the canvas texture
-    private void ClearCanvas()
-    {
-        for (int i = 0; i < canvasColors.Length; i++)
-        {
-            canvasColors[i] = Color.clear;
-        }
-    }
 
     // Method to clear the current drawing and create a new LineRenderer
     public void ResetDrawing()

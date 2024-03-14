@@ -18,12 +18,14 @@ public class UnityMqttReceiver : MonoBehaviour
 {
 
     [SerializeField]public string LocalReceiveTopic = "sony/ui";
+    public GameObject controllerPrefab; 
     private String msg;
+    public int consecutiveThreshold;
     private MqttClient client;
     private GameObject userController;
-    public GameObject controllerPrefab;
-
     private Dictionary<int, GameObject> controllers = new Dictionary<int, GameObject>(); // Store instantiated controllers by user ID
+
+    private Dictionary<int, int> consecutiveCounts = new Dictionary<int, int>();
 
     private ConcurrentQueue<System.Action> mainThreadActions = new ConcurrentQueue<System.Action>();
     //private int jointArrayCount = 0;
@@ -70,11 +72,14 @@ public class UnityMqttReceiver : MonoBehaviour
 
             mainThreadActions.Enqueue(() =>
             {
-
+                // Create a list to keep track of user IDs present in the received message
+                List<int> receivedUserIDs = new List<int>();
                 // Iterate over each user in the JSON
                 foreach (JObject user in usersArray)
                 {
                     int id = (int)user["id"];
+                    receivedUserIDs.Add(id); // Add the user ID to the list of received IDs
+                    Debug.Log("Received User IDs: " + string.Join(", ", receivedUserIDs));
                     // Retrieve the joint positions array
                     JArray jointsArray = user["joints"] as JArray;
 
@@ -86,6 +91,7 @@ public class UnityMqttReceiver : MonoBehaviour
                     }
                     else
                     {
+                        
                         // Instantiate controller prefab
                         userController = Instantiate(controllerPrefab, Vector3.one, Quaternion.identity);
                         // Set the name of the instantiated prefab
@@ -118,6 +124,49 @@ public class UnityMqttReceiver : MonoBehaviour
                     penLeft.UpdateLinePosition(jointLeft);
                     penLeft.UpdateCanvasTexture(id);
 
+                    // Reset consecutive count for the current ID
+                    if (consecutiveCounts.ContainsKey(id))
+                        consecutiveCounts[id] = 0;
+                    else
+                        consecutiveCounts.Add(id, 0);
+
+                }
+                // Create a copy of the keys in the controllers dictionary
+                List<int> controllerKeys = new List<int>(controllers.Keys);
+
+                // Debug log controllerKeys
+                Debug.Log("Controller Keys: " + string.Join(", ", controllerKeys));
+
+                // Iterate over the copied keys to update consecutive counts and destroy game objects if necessary
+                foreach (var id in controllerKeys)
+                {
+                    if (!receivedUserIDs.Contains(id))
+                    {
+                        Debug.Log("MISSED ID: " + id);
+                        
+                        // Increment consecutive count for the ID
+
+                        consecutiveCounts[id]++;
+
+
+                        Debug.Log("Consecutive Counts: " + string.Join(", ", consecutiveCounts.Select(kv => kv.Key + ":" + kv.Value)));
+
+
+                        // Check if consecutive count exceeds the desired threshold
+                        if (consecutiveCounts[id] >= consecutiveThreshold)
+                        {
+                            // If the consecutive count reaches the threshold, destroy the associated prefab
+
+                            Destroy(controllers[id]);
+                            controllers.Remove(id); // Remove the entry from the dictionary
+                            //consecutiveCounts.Remove(id); // Remove the entry from the consecutive counts dictionary
+                        }
+                    }
+                    else
+                    {
+                        // Reset consecutive count for the ID since it appeared in the received data
+                        consecutiveCounts[id] = 0;
+                    }
                 }
                     
             });
