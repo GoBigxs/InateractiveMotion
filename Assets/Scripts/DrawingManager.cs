@@ -66,4 +66,5 @@ public class DrawingManager : MonoBehaviour
     {
         canvasColors = colors;
     }
+
 }

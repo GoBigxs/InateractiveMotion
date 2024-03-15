@@ -96,7 +96,7 @@ public class Pen : MonoBehaviour
 
 
     // Method to update the position of the line based on the pen tip's movement
-    public void UpdateLinePosition(Vector3 joint)
+    public void UpdateLinePosition(int id, Vector3 joint)
     {
         // tip.position = joint;
         float distance = Vector3.Distance(previousTipPosition, joint);
@@ -111,6 +111,13 @@ public class Pen : MonoBehaviour
 
             previousTipPosition = joint;
             prevPositionCnt = currentDrawing.positionCount - 1;
+
+            string lineName = $"Line_{side}_" + id; // Generate line name based on ID
+            string currentDrawingName = currentDrawing.gameObject.name;
+            if (lineName != currentDrawingName)
+            {
+                currentDrawing.gameObject.name = lineName;
+            }
             
         }
     }
@@ -142,7 +149,6 @@ public class Pen : MonoBehaviour
 
 
         }
-
 
         // canvasTexture.SetPixels(canvasColors);
         // canvasTexture.Apply();
@@ -336,11 +342,4 @@ public class Pen : MonoBehaviour
         return new Vector2(scaledX, scaledY);
     }
 
-
-    // Method to clear the current drawing and create a new LineRenderer
-    public void ResetDrawing()
-    {
-        Destroy(currentDrawing.gameObject);
-        CreateNewLineRenderer();
-    }
 }
