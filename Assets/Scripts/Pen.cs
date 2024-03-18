@@ -24,7 +24,7 @@ public class Pen : MonoBehaviour
     public float penWidth = 0.01f;           // Width of the drawn line
     private Color penColor;       // Color of the pen
 
-    // public RawImage canvasImage;             // Reference to the RawImage component on the canvas
+    private int userID;
 
     public int lineWidth;                // Width of the drawn line on the canvas
     private LineRenderer currentDrawing;     // Reference to the current LineRenderer component
@@ -38,10 +38,10 @@ public class Pen : MonoBehaviour
 
     public string side = "Left";
 
-    private void Awake()
+    public void InitializePen(int id)
     {
 
-
+        userID =id;
         // Add colors to the list
         colorList.Add(Color.red);
         colorList.Add(Color.blue);
@@ -55,7 +55,7 @@ public class Pen : MonoBehaviour
         penColor = randomColor;
         
         tipMaterial.color = penColor;                // Set the tip color to the specified pen color
-        CreateNewLineRenderer();                     // Initialize the LineRenderer object
+        CreateNewLineRenderer(userID);                     // Initialize the LineRenderer object
         previousTipPosition = new Vector3(0.0f, 0.0f, 0.0f);          // Initialize the previous tip position
         // Initialize the canvas texture and colors
         // canvasTexture = new Texture2D((int)canvasImage.rectTransform.rect.width, (int)canvasImage.rectTransform.rect.height);
@@ -83,10 +83,10 @@ public class Pen : MonoBehaviour
     // }
 
     // Method to create a new LineRenderer object
-    private void CreateNewLineRenderer()
+    private void CreateNewLineRenderer(int id)
     {
 
-        currentDrawing = new GameObject(side).AddComponent<LineRenderer>(); // Create a new GameObject with a LineRenderer component
+        currentDrawing = new GameObject($"Line_{side}_" + id).AddComponent<LineRenderer>(); // Create a new GameObject with a LineRenderer component
         currentDrawing.material = drawingMaterial;                      // Assign the drawing material to the LineRenderer
         currentDrawing.startColor = currentDrawing.endColor = penColor; // Set the start and end color of the line to the pen color
         currentDrawing.startWidth = currentDrawing.endWidth = penWidth; // Set the start and end width of the line
@@ -96,7 +96,7 @@ public class Pen : MonoBehaviour
 
 
     // Method to update the position of the line based on the pen tip's movement
-    public void UpdateLinePosition(int id, Vector3 joint)
+    public void UpdateLinePosition(Vector3 joint)
     {
         // tip.position = joint;
         float distance = Vector3.Distance(previousTipPosition, joint);
@@ -111,20 +111,13 @@ public class Pen : MonoBehaviour
 
             previousTipPosition = joint;
             prevPositionCnt = currentDrawing.positionCount - 1;
-
-            string lineName = $"Line_{side}_" + id; // Generate line name based on ID
-            string currentDrawingName = currentDrawing.gameObject.name;
-            if (lineName != currentDrawingName)
-            {
-                currentDrawing.gameObject.name = lineName;
-            }
             
         }
     }
 
 
     // Method to update the canvas texture with the drawn lines
-    public void UpdateCanvasTexture(int id)
+    public void UpdateCanvasTexture()
     {
 
         LineRenderer lineRenderer = currentDrawing; // Assuming you have only one LineRenderer

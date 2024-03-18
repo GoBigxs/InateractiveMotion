@@ -28,6 +28,9 @@ public class UnityMqttReceiver : MonoBehaviour
     private Dictionary<int, int> consecutiveCounts = new Dictionary<int, int>();
 
     private ConcurrentQueue<System.Action> mainThreadActions = new ConcurrentQueue<System.Action>();
+    
+    private Pen penRight;
+    private Pen penLeft;
     //private int jointArrayCount = 0;
     void Awake()
     {
@@ -88,6 +91,10 @@ public class UnityMqttReceiver : MonoBehaviour
                         // Get the existing controller prefab associated with the user ID
                         userController = controllers[id];
 
+                        penRight = userController.transform.Find("PenRight").GetComponent<Pen>();
+                        penLeft = userController.transform.Find("PenLeft").GetComponent<Pen>();
+
+
                     }
                     else
                     {
@@ -98,6 +105,14 @@ public class UnityMqttReceiver : MonoBehaviour
                         userController.name = "User_" + id;
                         // Attach the controller to the dictionary with the user ID as the key
                         controllers.Add(id, userController);
+
+                        penRight = userController.transform.Find("PenRight").GetComponent<Pen>();
+                        penRight.InitializePen(id);
+                        penLeft = userController.transform.Find("PenLeft").GetComponent<Pen>();
+                        penLeft.InitializePen(id);
+
+
+
                     }
 
                     // Get the HumanController component attached to the GameObject
@@ -109,20 +124,15 @@ public class UnityMqttReceiver : MonoBehaviour
 
                     Vector3 jointLeft = humanController.GetJoint(4);
 
-                    // Find penRight within the userController
-                    GameObject penRightTransform = userController.transform.Find("PenRight").gameObject;
-                    GameObject penLeftTransform = userController.transform.Find("PenLeft").gameObject;
 
+                    // Pen penRight = userController.transform.Find("PenRight").GetComponent<Pen>();
+                    // Pen penLeft = userController.transform.Find("PenLeft").GetComponent<Pen>();
 
-                    // Check if PenRight has a Pen component attached
-                    Pen penRight = penRightTransform.GetComponent<Pen>();
-                    Pen penLeft = penLeftTransform.GetComponent<Pen>();
+                    penRight.UpdateLinePosition(jointRight);
+                    penRight.UpdateCanvasTexture();
 
-                    penRight.UpdateLinePosition(id, jointRight);
-                    penRight.UpdateCanvasTexture(id);
-
-                    penLeft.UpdateLinePosition(id, jointLeft);
-                    penLeft.UpdateCanvasTexture(id);
+                    penLeft.UpdateLinePosition(jointLeft);
+                    penLeft.UpdateCanvasTexture();
 
                     // Reset consecutive count for the current ID
                     if (consecutiveCounts.ContainsKey(id))
