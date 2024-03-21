@@ -23,6 +23,7 @@ public class UnityMqttReceiver : MonoBehaviour
     public int consecutiveThreshold;
     private MqttClient client;
     private GameObject userController;
+    private DrawingManager DrawingManager;
     private Dictionary<int, GameObject> controllers = new Dictionary<int, GameObject>(); // Store instantiated controllers by user ID
 
     private Dictionary<int, int> consecutiveCounts = new Dictionary<int, int>();
@@ -94,7 +95,6 @@ public class UnityMqttReceiver : MonoBehaviour
                         penRight = userController.transform.Find("PenRight").GetComponent<Pen>();
                         penLeft = userController.transform.Find("PenLeft").GetComponent<Pen>();
 
-
                     }
                     else
                     {
@@ -103,16 +103,16 @@ public class UnityMqttReceiver : MonoBehaviour
                         userController = Instantiate(controllerPrefab, Vector3.one, Quaternion.identity);
                         // Set the name of the instantiated prefab
                         userController.name = "User_" + id;
+
                         // Attach the controller to the dictionary with the user ID as the key
                         controllers.Add(id, userController);
+
+                        //DrawingManager.Instance.InitializeCanvas(id);
 
                         penRight = userController.transform.Find("PenRight").GetComponent<Pen>();
                         penRight.InitializePen(id);
                         penLeft = userController.transform.Find("PenLeft").GetComponent<Pen>();
                         penLeft.InitializePen(id);
-
-
-
                     }
 
                     // Get the HumanController component attached to the GameObject
@@ -124,15 +124,11 @@ public class UnityMqttReceiver : MonoBehaviour
 
                     Vector3 jointLeft = humanController.GetJoint(4);
 
-
-                    // Pen penRight = userController.transform.Find("PenRight").GetComponent<Pen>();
-                    // Pen penLeft = userController.transform.Find("PenLeft").GetComponent<Pen>();
-
                     penRight.UpdateLinePosition(jointRight);
-                    penRight.UpdateCanvasTexture();
+                    penRight.UpdateCanvasTexture(id);
 
                     penLeft.UpdateLinePosition(jointLeft);
-                    penLeft.UpdateCanvasTexture();
+                    penLeft.UpdateCanvasTexture(id);
 
                     // Reset consecutive count for the current ID
                     if (consecutiveCounts.ContainsKey(id))
@@ -168,6 +164,7 @@ public class UnityMqttReceiver : MonoBehaviour
                             // If the consecutive count reaches the threshold, destroy the associated prefab
 
                             Destroy(controllers[id]);
+                            Debug.Log("Destroy id: " + id);
 
                             GameObject rightlineRender = GameObject.Find("Line_Right_" + id);
                             GameObject leftlineRender = GameObject.Find("Line_Left_" + id);
@@ -177,6 +174,8 @@ public class UnityMqttReceiver : MonoBehaviour
 
                             controllers.Remove(id); // Remove the entry from the dictionary
                             consecutiveCounts.Remove(id); // Remove the entry from the consecutive counts dictionary
+                            Debug.Log("removes: " + id);
+                            DrawingManager.Instance.RemoveUserDrawing(id);
                         }
                     }
                     else

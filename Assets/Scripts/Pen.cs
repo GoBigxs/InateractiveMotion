@@ -32,6 +32,7 @@ public class Pen : MonoBehaviour
     public PenState penState { get; private set; } // Public property to access penState
     private Texture2D canvasTexture;         // Texture used for drawing on the canvas
     private Color[] canvasColors;            // Array to store colors of the canvas texture
+    private Color[] canvasColorsOfUser;
     private int prevPositionCnt = 0;
     private DrawingManager DrawingManager; // Reference to the DrawingManager component
     private List<Color> colorList = new List<Color>();
@@ -55,6 +56,7 @@ public class Pen : MonoBehaviour
         penColor = randomColor;
         
         tipMaterial.color = penColor;                // Set the tip color to the specified pen color
+        Debug.Log($"Line_{side}" + "pencolor "+ penColor + "id " + id);
         CreateNewLineRenderer(userID);                     // Initialize the LineRenderer object
         previousTipPosition = new Vector3(0.0f, 0.0f, 0.0f);          // Initialize the previous tip position
         // Initialize the canvas texture and colors
@@ -64,6 +66,7 @@ public class Pen : MonoBehaviour
 
         canvasTexture = DrawingManager.Instance.GetCanvasTexture();
         canvasColors = DrawingManager.Instance.GetCanvasColors();
+        canvasColorsOfUser = DrawingManager.Instance.GetCanvasColorsOfUser(userID);
         //Debug.Log("currentDrawing is null: " + (currentDrawing));
     }
 
@@ -117,7 +120,7 @@ public class Pen : MonoBehaviour
 
 
     // Method to update the canvas texture with the drawn lines
-    public void UpdateCanvasTexture()
+    public void UpdateCanvasTexture(int id)
     {
 
         LineRenderer lineRenderer = currentDrawing; // Assuming you have only one LineRenderer
@@ -132,12 +135,12 @@ public class Pen : MonoBehaviour
 
             if (IsPenTouchingPaper(startPixel) && IsPenTouchingPaper(endPixel))
             {
-                StartCoroutine(SendDataToServer(prevPositionCnt, startPixel.z, endPixel.z, startPixelUV, endPixelUV, true));
+                StartCoroutine(SendDataToServer(prevPositionCnt, startPixel.z, endPixel.z, startPixelUV, endPixelUV, true, side, id));
                 DrawLine(startPixelUV, endPixelUV, lineWidth);
             }
             else
             {
-                StartCoroutine(SendDataToServer(prevPositionCnt, startPixel.z, endPixel.z, startPixelUV, endPixelUV, false));
+                StartCoroutine(SendDataToServer(prevPositionCnt, startPixel.z, endPixel.z, startPixelUV, endPixelUV, false, side, id));
             }
 
 
@@ -145,14 +148,14 @@ public class Pen : MonoBehaviour
 
         // canvasTexture.SetPixels(canvasColors);
         // canvasTexture.Apply();
-        DrawingManager.Instance.UpdateCanvas(canvasColors);
+        DrawingManager.Instance.UpdateCanvas(id, canvasColors, canvasColorsOfUser);
     }
 
 
     // Method to check if the pen is touching the paper at a certain point
     private bool IsPenTouchingPaper(Vector3 position)
     {
-        if (position.z>=1.9f)
+        if (position.z>=1.8f)
         {
             //Debug.Log("Point " + point + " is within the desired area.");
             // Return true if the point is within the area
@@ -199,8 +202,55 @@ public class Pen : MonoBehaviour
         }
 
     }
+    private void DrawSegment(Vector2 start, Vector2 end, int lineWidth)
+    {
+        // Calculate the delta values for the line
+        float dx = Mathf.Abs(end.x - start.x);
+        float dy = Mathf.Abs(end.y - start.y);
 
-    private IEnumerator SendDataToServer(int i, float z1, float z2, Vector2 start, Vector2 end, bool penTouchingPaper)
+        // Determine the sign for each axis
+        int sx = (start.x < end.x) ? 1 : -1;
+        int sy = (start.y < end.y) ? 1 : -1;
+
+        // Start position
+        float x = start.x;
+        float y = start.y;
+
+        // Error value for adjusting the next pixel position
+        float error = dx - dy;
+
+        // Iterate over the line and set pixels
+        for (int i = 0; i <= Mathf.Max(dx, dy); i++)
+        {
+            // Set the pixels along the line for the given line width
+            for (int j = -lineWidth / 2; j <= lineWidth / 2; j++)
+            {
+                int pixelX = Mathf.RoundToInt(x);
+                int pixelY = Mathf.RoundToInt(y) + j;
+
+                if (pixelX >= 0 && pixelX < canvasTexture.width && pixelY >= 0 && pixelY < canvasTexture.height)
+                {
+                    canvasColors[pixelY * canvasTexture.width + pixelX] = penColor;
+                    canvasColorsOfUser[pixelY * canvasTexture.width + pixelX] = penColor;
+                }
+            }
+
+            // Calculate the next pixel position
+            float error2 = error * 2;
+            if (error2 > -dy)
+            {
+                error -= dy;
+                x += sx;
+            }
+            if (error2 < dx)
+            {
+                error += dx;
+                y += sy;
+            }
+        }
+    }
+
+    private IEnumerator SendDataToServer(int i, float z1, float z2, Vector2 start, Vector2 end, bool penTouchingPaper,string side, int id)
     {
         // Define the URL of your Python server
         string serverURL = "http://localhost:5000/receive";
@@ -215,6 +265,8 @@ public class Pen : MonoBehaviour
         data.endX = end.x;
         data.endY = end.y;
         data.penTouchingPaper = penTouchingPaper;
+        data.side = side;
+        data.id = id;
         
 
         // Convert data object to JSON
@@ -266,54 +318,10 @@ public class Pen : MonoBehaviour
         public float z1;
         public float z2;
         public bool penTouchingPaper;
+        public string side;
+        public int id;
     }
 
-    private void DrawSegment(Vector2 start, Vector2 end, int lineWidth)
-    {
-        // Calculate the delta values for the line
-        float dx = Mathf.Abs(end.x - start.x);
-        float dy = Mathf.Abs(end.y - start.y);
-
-        // Determine the sign for each axis
-        int sx = (start.x < end.x) ? 1 : -1;
-        int sy = (start.y < end.y) ? 1 : -1;
-
-        // Start position
-        float x = start.x;
-        float y = start.y;
-
-        // Error value for adjusting the next pixel position
-        float error = dx - dy;
-
-        // Iterate over the line and set pixels
-        for (int i = 0; i <= Mathf.Max(dx, dy); i++)
-        {
-            // Set the pixels along the line for the given line width
-            for (int j = -lineWidth / 2; j <= lineWidth / 2; j++)
-            {
-                int pixelX = Mathf.RoundToInt(x);
-                int pixelY = Mathf.RoundToInt(y) + j;
-
-                if (pixelX >= 0 && pixelX < canvasTexture.width && pixelY >= 0 && pixelY < canvasTexture.height)
-                {
-                    canvasColors[pixelY * canvasTexture.width + pixelX] = penColor;
-                }
-            }
-
-            // Calculate the next pixel position
-            float error2 = error * 2;
-            if (error2 > -dy)
-            {
-                error -= dy;
-                x += sx;
-            }
-            if (error2 < dx)
-            {
-                error += dx;
-                y += sy;
-            }
-        }
-    }
 
     // Method to convert world position to canvas position
     private Vector2 WorldToCanvasPoint(Vector3 worldPosition)
