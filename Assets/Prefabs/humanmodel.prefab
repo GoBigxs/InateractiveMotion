@@ -779,10 +779,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e07da7003e4b816a7bfdd09b31d2005d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  linePrefab: {fileID: 8076762885873494743, guid: d98913bec418b7ade93f328c002cd865, type: 3}
   drawingMaterial: {fileID: 10306, guid: 0000000000000000f000000000000000, type: 0}
   tipMaterial: {fileID: 2100000, guid: 4961bee1238cb67a3b4c7d0762f98f3e, type: 2}
   penWidth: 0.01
-  penColor: {r: 1, g: 0, b: 0, a: 1}
   lineWidth: 2
   side: Right
 --- !u!1 &4639714272363428896
@@ -829,10 +829,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e07da7003e4b816a7bfdd09b31d2005d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  linePrefab: {fileID: 8076762885873494743, guid: d98913bec418b7ade93f328c002cd865, type: 3}
   drawingMaterial: {fileID: 10306, guid: 0000000000000000f000000000000000, type: 0}
   tipMaterial: {fileID: 2100000, guid: 4961bee1238cb67a3b4c7d0762f98f3e, type: 2}
   penWidth: 0.01
-  penColor: {r: 0, g: 1, b: 0, a: 1}
   lineWidth: 2
   side: Left
 --- !u!1 &6297096393318113814

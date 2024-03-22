@@ -13,6 +13,7 @@ public class DrawingManager : MonoBehaviour
     private Dictionary<int, Color[]> userDrawings = new Dictionary<int, Color[]>(); // Mapping between user IDs and their drawing data
     private Texture2D canvasTexture; // Single canvas texture for all users
     private Color[] canvasColors;    // Array to store colors of the canvas texture
+    private RectTransform canvasRectTransform; // RectTransform of the Canvas
 
 
     private void Awake()
@@ -26,6 +27,7 @@ public class DrawingManager : MonoBehaviour
             Instance = this;
             DontDestroyOnLoad(gameObject);
             InitializeCanvas();
+            canvasRectTransform = canvasImage.GetComponent<RectTransform>(); // Get RectTransform component of the Canvas
         }
     }
 
@@ -120,6 +122,17 @@ public class DrawingManager : MonoBehaviour
         }
     }
 
+    // Function to get the world position of the Canvas
+    public Vector3 GetCanvasWorldPosition()
+    {
+        // Get the position of the Canvas in screen space
+        Vector2 screenPosition = canvasRectTransform.position;
 
+        // Convert screen space position to world space
+        Vector3 worldPosition = Vector3.zero;
+        RectTransformUtility.ScreenPointToWorldPointInRectangle(canvasRectTransform, screenPosition, null, out worldPosition);
+
+        return worldPosition;
+    }
 
 }

@@ -32,6 +32,7 @@ public class UnityMqttReceiver : MonoBehaviour
     
     private Pen penRight;
     private Pen penLeft;
+    private float startTime = 0.0f;
     //private int jointArrayCount = 0;
     void Awake()
     {
@@ -50,20 +51,27 @@ public class UnityMqttReceiver : MonoBehaviour
         client.Connect(clientId); 
         
         // subscribe to the topic "/home/temperature" with QoS 2 
-        client.Subscribe(new string[] { LocalReceiveTopic }, new byte[] { MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE }); 
+        client.Subscribe(new string[] { LocalReceiveTopic }, new byte[] { MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE });
+        
+        
     }
 
     void Update()
     {
+        startTime =  Time.time; 
         // Execute all queued actions on the main thread
         while (mainThreadActions.TryDequeue(out var action))
         {
+            
             action.Invoke();
+
         }
+
     }
 
 	void Client_MqttMsgPublishReceived(object sender, MqttMsgPublishEventArgs e) 
 	{ 
+        
         msg = System.Text.Encoding.UTF8.GetString(e.Message);
 	    JObject jsonObject = JsonConvert.DeserializeObject<JObject>(msg);
         //var jointsArray = jsonObject["joints"] as JArray;
@@ -83,7 +91,7 @@ public class UnityMqttReceiver : MonoBehaviour
                 {
                     int id = (int)user["id"];
                     receivedUserIDs.Add(id); // Add the user ID to the list of received IDs
-                    Debug.Log("Received User IDs: " + string.Join(", ", receivedUserIDs));
+                    // Debug.Log("Received User IDs: " + string.Join(", ", receivedUserIDs));
                     // Retrieve the joint positions array
                     JArray jointsArray = user["joints"] as JArray;
 
@@ -137,6 +145,12 @@ public class UnityMqttReceiver : MonoBehaviour
                         consecutiveCounts.Add(id, 0);
 
                 }
+                float currentTime = (Time.time - startTime);
+                // Format the milliseconds to four decimal places
+                string formattedTime = currentTime.ToString("F4");
+                //Debug.Log("current time: " + formattedTime);
+                
+
                 // Create a copy of the keys in the controllers dictionary
                 List<int> controllerKeys = new List<int>(controllers.Keys);
 
