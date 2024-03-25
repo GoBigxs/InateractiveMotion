@@ -13,6 +13,10 @@ using System.Collections.Concurrent;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Unity.VisualScripting;
+using UnityEngine.Networking;
+using UnityEngine.UI;
+
+
 
 public class UnityMqttReceiver : MonoBehaviour
 {
@@ -66,6 +70,10 @@ public class UnityMqttReceiver : MonoBehaviour
             action.Invoke();
 
         }
+        // Retrieve the image  from python server via GET request
+        var (taskID, data) = DataManager.PeekFirstData();
+        Debug.Log(taskID);
+        StartCoroutine(DownloadImage(taskID));
 
     }
 
@@ -155,7 +163,7 @@ public class UnityMqttReceiver : MonoBehaviour
                 List<int> controllerKeys = new List<int>(controllers.Keys);
 
                 // Debug log controllerKeys
-                Debug.Log("Controller Keys: " + string.Join(", ", controllerKeys));
+                // Debug.Log("Controller Keys: " + string.Join(", ", controllerKeys));
 
                 // Iterate over the copied keys to update consecutive counts and destroy game objects if necessary
                 foreach (var id in controllerKeys)
@@ -222,6 +230,60 @@ public class UnityMqttReceiver : MonoBehaviour
             Debug.LogWarning($"Controller with ID {id} not found.");
             return null;
         }
+    }
+
+
+    // Function to download image data from the server
+    public IEnumerator DownloadImage(int taskID)
+    {
+        string serverURL = "http://localhost:5000/get_image";
+        // Construct the URL with the task ID as a query parameter
+        string urlWithTaskID = $"{serverURL}?taskID={taskID}";
+ 
+        // Create a UnityWebRequest to send the GET request
+        UnityWebRequest www = UnityWebRequest.Get(urlWithTaskID);
+ 
+        yield return www.SendWebRequest();
+ 
+        if (www.result == UnityWebRequest.Result.Success)
+        {
+            ImageResponse response = JsonUtility.FromJson<ImageResponse>(www.downloadHandler.text);
+            if (response.task_status)
+            {
+                // Update the image texture with the flower image
+                byte[] imageData = Convert.FromBase64String(response.image_bytes);
+                RawImage flowerImage = GameObject.Find("flowerImage_" + taskID.ToString()).GetComponent<RawImage>();;
+                Texture2D texture = new Texture2D(1,1);
+                texture.LoadImage(imageData);
+                flowerImage.texture = texture;
+
+                Debug.Log("Task completed successfully: " + taskID);
+
+                // Delete task (taskID) from DataManager
+                DataManager.RetrieveAndRemoveData();
+
+
+            }
+            else
+            {
+                Debug.Log("Task is not completed yet: " + taskID);
+            }
+            // // Return the downloaded image data
+            // yield return www.downloadHandler.data;
+        }
+        else
+        {
+            Debug.LogError("Failed to load image: " + www.error);
+            // Return null if failed to download image data
+            // yield return null;
+        }
+    }
+
+    [System.Serializable]
+    public class ImageResponse
+    {
+        public bool task_status;
+        public string image_bytes;  // Will be null if 'None' is sent from Flask
     }
 
 }

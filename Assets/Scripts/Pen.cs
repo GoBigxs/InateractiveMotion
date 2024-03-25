@@ -19,7 +19,9 @@ public class Pen : MonoBehaviour
     [Header("Pen Properties")]
     // // public Transform tip;                    // Reference to the transform representing the tip of the pen
     Coroutine drawing;
+    public Canvas canvas;
     public GameObject linePrefab;
+    public GameObject rawImagePrefab;     // RawImage prefab for flower image
     public Material drawingMaterial;         // Material used for drawing lines
     public Material tipMaterial;             // Material used for the tip of the pen
     [Range(0.01f, 0.1f)]
@@ -47,6 +49,7 @@ public class Pen : MonoBehaviour
     private Vector3 startPixel;
     private Vector3 endPixel;
     private Vector2 startPixelCanvas, endPixelCanvas;
+
 
 
     public void InitializePen(int id)
@@ -79,6 +82,10 @@ public class Pen : MonoBehaviour
         //Debug.Log("currentDrawing is null: " + (currentDrawing));
 
         canvasPosition = DrawingManager.Instance.GetCanvasWorldPosition();
+
+
+        Debug.Log("RawImagePrefab is " + (rawImagePrefab == null));
+        Debug.Log("LinePrefab is " + (linePrefab == null));
 
     }
 
@@ -136,7 +143,7 @@ public class Pen : MonoBehaviour
 
             Vector2 startPixelUV = WorldToCanvasPoint(startPixel);
             Vector2 endPixelUV = WorldToCanvasPoint(endPixel);
-            Debug.Log($"Line_{side}_ + {userID} " +  (drawing == null));
+            // Debug.Log($"Line_{side}_ + {userID} " +  (drawing == null));
             if (IsPenTouchingPaper(startPixel) && IsPenTouchingPaper(endPixel))
             {
                 curState = true;
@@ -158,7 +165,7 @@ public class Pen : MonoBehaviour
                     FinishLine();
                 }
 
-                Debug.Log($"Line_{side}_ + {userID} " + "finishline");
+                // Debug.Log($"Line_{side}_ + {userID} " + "finishline");
 
             }
             prevState = curState;
@@ -174,11 +181,11 @@ public class Pen : MonoBehaviour
     {
         if (drawing != null)
         {
-            Debug.Log($"Line_{side}_ + {userID} " + "StartLine coroutine stopped");
+            // Debug.Log($"Line_{side}_ + {userID} " + "StartLine coroutine stopped");
             //StopCoroutine(drawing);
         }
         drawing = StartCoroutine(Draw2DLine());
-        Debug.Log($"Line_{side}_ + {userID} " + "coroutine started"+ (drawing == null));
+        // Debug.Log($"Line_{side}_ + {userID} " + "coroutine started"+ (drawing == null));
 
     }
     private void FinishLine()
@@ -187,7 +194,7 @@ public class Pen : MonoBehaviour
         {
             StopCoroutine(drawing);
             drawing = null;
-            Debug.Log($"Line_{side}_ + {userID} " + "coroutine FinishLine executed");
+            // Debug.Log($"Line_{side}_ + {userID} " + "coroutine FinishLine executed");
 
         }
     }
@@ -196,7 +203,7 @@ public class Pen : MonoBehaviour
     {
         GameObject line2d = Instantiate(linePrefab, Vector3.zero, Quaternion.identity);
         line = line2d.GetComponent<LineRenderer>(); 
-        Debug.Log($"Line_{side}_ + {userID} " + "line created");
+        // Debug.Log($"Line_{side}_ + {userID} " + "line created");
 
             // Set line width
         line.startWidth = 2f; // Adjust the width as needed
@@ -216,7 +223,7 @@ public class Pen : MonoBehaviour
             line.positionCount+= 1;
             line.SetPosition(line.positionCount - 1, startPosition);
             //line.SetPosition(line.positionCount - 1, endPosition);
-            Debug.Log($"Line_{side}_ + {userID}_ " + line.positionCount + ": " + startPosition);
+            // Debug.Log($"Line_{side}_ + {userID}_ " + line.positionCount + ": " + startPosition);
             yield return null;
         }
     }
@@ -247,77 +254,7 @@ public class Pen : MonoBehaviour
         return colorList[randomIndex];
     }
 
-    private void DrawLine(Vector2 start, Vector2 end, int lineWidth)
-    {
-        // Calculate the direction vector of the line
-        Vector2 direction = (end - start).normalized;
-
-        // Calculate the perpendicular vector to the line
-        Vector2 perpendicular = new Vector2(-direction.y, direction.x);
-
-        // Draw the first segment
-        DrawSegment(start - perpendicular * lineWidth / 2f, end - perpendicular * lineWidth / 2f, lineWidth);
-
-        // If the line width is greater than 1, draw additional segments to fill the gap
-        for (int i = 1; i < lineWidth; i++)
-        {
-            float offset = (float)i / (float)(lineWidth - 1) * lineWidth; // Offset along the perpendicular vector
-            // Calculate the adjusted start and end points
-            Vector2 adjustedStart = start - perpendicular * offset;
-            Vector2 adjustedEnd = end - perpendicular * offset;
-
-            // Draw the additional segment
-            DrawSegment(adjustedStart, adjustedEnd, lineWidth);
-        }
-
-    }
-    private void DrawSegment(Vector2 start, Vector2 end, int lineWidth)
-    {
-        // Calculate the delta values for the line
-        float dx = Mathf.Abs(end.x - start.x);
-        float dy = Mathf.Abs(end.y - start.y);
-
-        // Determine the sign for each axis
-        int sx = (start.x < end.x) ? 1 : -1;
-        int sy = (start.y < end.y) ? 1 : -1;
-
-        // Start position
-        float x = start.x;
-        float y = start.y;
-
-        // Error value for adjusting the next pixel position
-        float error = dx - dy;
-
-        // Iterate over the line and set pixels
-        for (int i = 0; i <= Mathf.Max(dx, dy); i++)
-        {
-            // Set the pixels along the line for the given line width
-            for (int j = -lineWidth / 2; j <= lineWidth / 2; j++)
-            {
-                int pixelX = Mathf.RoundToInt(x);
-                int pixelY = Mathf.RoundToInt(y) + j;
-
-                if (pixelX >= 0 && pixelX < canvasTexture.width && pixelY >= 0 && pixelY < canvasTexture.height)
-                {
-                    canvasColors[pixelY * canvasTexture.width + pixelX] = penColor;
-                    canvasColorsOfUser[pixelY * canvasTexture.width + pixelX] = penColor;
-                }
-            }
-
-            // Calculate the next pixel position
-            float error2 = error * 2;
-            if (error2 > -dy)
-            {
-                error -= dy;
-                x += sx;
-            }
-            if (error2 < dx)
-            {
-                error += dx;
-                y += sy;
-            }
-        }
-    }
+   
 
     private IEnumerator SendDataToServer(int i, float z1, float z2, Vector2 start, Vector2 end, bool penTouchingPaper,string side, int id)
     {
@@ -341,9 +278,6 @@ public class Pen : MonoBehaviour
         // Convert data object to JSON
         string jsonData = JsonUtility.ToJson(data);
 
-        // Debug and print the JSON data
-        //Debug.Log("JSON Data: " + jsonData);
-
         // Create a UnityWebRequest
         using (UnityWebRequest request = UnityWebRequest.Put(serverURL, jsonData))
         {
@@ -357,19 +291,48 @@ public class Pen : MonoBehaviour
             yield return request.SendWebRequest();
 
             // Check for errors
-            if (request.result != UnityWebRequest.Result.Success)
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                // Debug.Log("Data sent successfully");
+                ServerResponse response = JsonUtility.FromJson<ServerResponse>(request.downloadHandler.text);
+
+                // Add info of the new task to the DataManager
+                if (response.new_task)
+                {
+                    Vector2 position = new Vector2(response.pos[0], response.pos[1]);
+                    Data newData = new Data(response.user_id, response.side, position, response.size);
+                    // Use the task_id from the response as the key to add Data to the DataManager
+                    DataManager.AddData(response.task_id, newData);
+
+                    // Add new rawImage for later use
+                    GameObject newRawImage = Instantiate(rawImagePrefab, position, Quaternion.identity, canvas.transform);
+                    newRawImage.name = "flowerImage_" + response.task_id;
+                    RectTransform rawImageRect = newRawImage.GetComponent<RectTransform>();
+                    rawImageRect.sizeDelta = new Vector2(response.size, response.size);
+
+                    Debug.Log($"New Task: {response.new_task}, Task ID: {response.task_id}, User ID: {response.user_id}, Side: {response.side}, Position: [{response.pos[0]}, {response.pos[1]}], Size: {response.size}");
+                }
+
+            }
+            else
             {
                 // Log the error
                 Debug.LogError(request.error);
             }
-            else
-            {
-                // Debug.Log("Data sent successfully");
-                // Debug.Log(request.downloadHandler.text); // Log the response from the server
-            }
         }
     }
 
+    // Method to convert world position to canvas position
+    private Vector2 WorldToCanvasPoint(Vector3 worldPosition)
+    {
+        Vector3 scaledPosition = worldPosition * 100;
+
+        // Assuming your 3D world space is within a certain range, you can scale it to fit the 500x500 canvas
+        float scaledX = Mathf.InverseLerp(-250f, 250f, scaledPosition.x) * 600f;
+        float scaledY = Mathf.InverseLerp(20f, 220f, scaledPosition.y) * 270f;
+
+        return new Vector2(scaledX, scaledY);
+    }
 
     // Define a class to hold start and end positions
     [System.Serializable]
@@ -387,17 +350,16 @@ public class Pen : MonoBehaviour
         public int id;
     }
 
-
-    // Method to convert world position to canvas position
-    private Vector2 WorldToCanvasPoint(Vector3 worldPosition)
+    [System.Serializable]
+    public class ServerResponse
     {
-        Vector3 scaledPosition = worldPosition * 100;
-
-        // Assuming your 3D world space is within a certain range, you can scale it to fit the 500x500 canvas
-        float scaledX = Mathf.InverseLerp(-250f, 250f, scaledPosition.x) * 600f;
-        float scaledY = Mathf.InverseLerp(20f, 220f, scaledPosition.y) * 270f;
-
-        return new Vector2(scaledX, scaledY);
+        public bool new_task;
+        public int task_id;
+        public int user_id;
+        public string side;
+        public float[] pos; // pos: [x, y]
+        public int size;
     }
+  
 
 }

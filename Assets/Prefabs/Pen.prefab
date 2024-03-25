@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 9085330707500155662}
   - component: {fileID: 8906866596776065158}
   - component: {fileID: 8702974570186471399}
-  - component: {fileID: 5069773769348550948}
+  - component: {fileID: 6022160519455903727}
   m_Layer: 0
   m_Name: Pen
   m_TagString: Untagged
@@ -136,7 +136,7 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &5069773769348550948
+--- !u!114 &6022160519455903727
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -148,14 +148,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e07da7003e4b816a7bfdd09b31d2005d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tip: {fileID: 2284825883416753130}
-  drawingMaterial: {fileID: 10306, guid: 0000000000000000f000000000000000, type: 0}
-  tipMaterial: {fileID: 2100000, guid: 4961bee1238cb67a3b4c7d0762f98f3e, type: 2}
+  linePrefab: {fileID: 8076762885873494743, guid: d98913bec418b7ade93f328c002cd865, type: 3}
+  rawImagePrefab: {fileID: 4223791464762066200, guid: 5d50e3a58264945b2a99e9c968dcddb1, type: 3}
+  drawingMaterial: {fileID: 0}
+  tipMaterial: {fileID: 0}
   penWidth: 0.01
-  canvas_z: 1.5
-  penColor: {r: 1, g: 0, b: 0, a: 1}
-  canvasImage: {fileID: 0}
-  lineWidth: 20
+  lineWidth: 0
+  side: Left
 --- !u!1 &2626053679686402382
 GameObject:
   m_ObjectHideFlags: 0

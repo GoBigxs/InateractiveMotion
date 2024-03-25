@@ -779,7 +779,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e07da7003e4b816a7bfdd09b31d2005d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  canvas: {fileID: 0}
   linePrefab: {fileID: 8076762885873494743, guid: d98913bec418b7ade93f328c002cd865, type: 3}
+  rawImagePrefab: {fileID: 4223791464762066200, guid: 5d50e3a58264945b2a99e9c968dcddb1, type: 3}
   drawingMaterial: {fileID: 10306, guid: 0000000000000000f000000000000000, type: 0}
   tipMaterial: {fileID: 2100000, guid: 4961bee1238cb67a3b4c7d0762f98f3e, type: 2}
   penWidth: 0.01
@@ -829,7 +831,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e07da7003e4b816a7bfdd09b31d2005d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  canvas: {fileID: 0}
   linePrefab: {fileID: 8076762885873494743, guid: d98913bec418b7ade93f328c002cd865, type: 3}
+  rawImagePrefab: {fileID: 4223791464762066200, guid: 5d50e3a58264945b2a99e9c968dcddb1, type: 3}
   drawingMaterial: {fileID: 10306, guid: 0000000000000000f000000000000000, type: 0}
   tipMaterial: {fileID: 2100000, guid: 4961bee1238cb67a3b4c7d0762f98f3e, type: 2}
   penWidth: 0.01
