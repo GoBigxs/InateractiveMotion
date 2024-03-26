@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.4465785, g: 0.49641252, b: 0.574817, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657832, g: 0.49641222, b: 0.57481664, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -297,7 +297,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 268, y: 107}
+  m_AnchoredPosition: {x: 268, y: 150}
   m_SizeDelta: {x: 1714, y: 739}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &649111482
@@ -498,6 +498,7 @@ MonoBehaviour:
   LocalReceiveTopic: sony/ui
   controllerPrefab: {fileID: 8815910897921651553, guid: 862c77a0096561bc387226d70c275f95, type: 3}
   consecutiveThreshold: 10
+  rawImagePrefab: {fileID: 4223791464762066200, guid: 5d50e3a58264945b2a99e9c968dcddb1, type: 3}
 --- !u!4 &925423898
 Transform:
   m_ObjectHideFlags: 0
@@ -674,7 +675,7 @@ Transform:
   m_GameObject: {fileID: 963194225}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 268, y: 107, z: -250}
+  m_LocalPosition: {x: 268, y: 150, z: -250}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

@@ -33,7 +33,8 @@ public class UnityMqttReceiver : MonoBehaviour
     private Dictionary<int, int> consecutiveCounts = new Dictionary<int, int>();
 
     private ConcurrentQueue<System.Action> mainThreadActions = new ConcurrentQueue<System.Action>();
-    
+    private Canvas canvas;
+    public GameObject rawImagePrefab;     // RawImage prefab for flower image
     private Pen penRight;
     private Pen penLeft;
     private float startTime = 0.0f;
@@ -46,7 +47,6 @@ public class UnityMqttReceiver : MonoBehaviour
         // create client instance 
         // Create a new instance of MqttClient
 	    client = new MqttClient("127.0.0.1");
-
 
         // register to message received 
         client.MqttMsgPublishReceived += Client_MqttMsgPublishReceived; 
@@ -72,8 +72,8 @@ public class UnityMqttReceiver : MonoBehaviour
         }
         // Retrieve the image  from python server via GET request
         var (taskID, data) = DataManager.PeekFirstData();
-        Debug.Log(taskID);
-        StartCoroutine(DownloadImage(taskID));
+        //Debug.Log(taskID);
+        StartCoroutine(DownloadImage(taskID, data));
 
     }
 
@@ -232,9 +232,49 @@ public class UnityMqttReceiver : MonoBehaviour
         }
     }
 
+    private void CreateRawImage(int taskID, Data data)
+    {
+        // Find the Canvas GameObject by name
+        canvas = GameObject.Find("Canvas").GetComponent<Canvas>();
+
+        if (canvas == null || rawImagePrefab == null)
+        {
+            Debug.LogError("Canvas or RawImage prefab is not assigned!");
+            return;
+        }
+
+        // Add new RawImage for later use
+        GameObject newRawImage = Instantiate(rawImagePrefab, data.position, Quaternion.identity, canvas.transform);
+        newRawImage.name = "flowerImage_" + taskID;
+        RectTransform rawImageRect = newRawImage.GetComponent<RectTransform>();
+        rawImageRect.sizeDelta = new Vector2(data.size, data.size);
+    }
+
+    private void DeleteGameObjectsByID(Data data)
+    {
+        int userID = data.userID;
+        string side = data.side;
+
+        foreach (int id in data.lineIDs)
+        {
+            string gameObjectName = $"Line_User{userID}_{side}_" + id;
+            GameObject gameObjectToDelete = GameObject.Find(gameObjectName);
+
+            if (gameObjectToDelete != null)
+            {
+                Destroy(gameObjectToDelete);
+                Debug.Log("Deleted GameObject with name: " + gameObjectName);
+            }
+            else
+            {
+                Debug.LogWarning("No GameObject found with name: " + gameObjectName);
+            }
+        }
+    }
+
 
     // Function to download image data from the server
-    public IEnumerator DownloadImage(int taskID)
+    public IEnumerator DownloadImage(int taskID, Data data)
     {
         string serverURL = "http://localhost:5000/get_image";
         // Construct the URL with the task ID as a query parameter
@@ -250,23 +290,34 @@ public class UnityMqttReceiver : MonoBehaviour
             ImageResponse response = JsonUtility.FromJson<ImageResponse>(www.downloadHandler.text);
             if (response.task_status)
             {
+                CreateRawImage(taskID, data);
                 // Update the image texture with the flower image
                 byte[] imageData = Convert.FromBase64String(response.image_bytes);
-                RawImage flowerImage = GameObject.Find("flowerImage_" + taskID.ToString()).GetComponent<RawImage>();;
+                RawImage flowerImage = GameObject.Find("flowerImage_" + taskID.ToString()).GetComponent<RawImage>();
+                 // Get the current color of the RawImage
+                Color currentColor = flowerImage.color;
+
+                // Create a new color with the desired alpha value
+                Color newColor = new Color(currentColor.r, currentColor.g, currentColor.b, 255);
+
+                flowerImage.color = newColor;
+
                 Texture2D texture = new Texture2D(1,1);
                 texture.LoadImage(imageData);
                 flowerImage.texture = texture;
+                DeleteGameObjectsByID(data);
 
-                Debug.Log("Task completed successfully: " + taskID);
+
+
+                //Debug.Log("Task completed successfully: " + taskID);
 
                 // Delete task (taskID) from DataManager
+
                 DataManager.RetrieveAndRemoveData();
-
-
             }
             else
             {
-                Debug.Log("Task is not completed yet: " + taskID);
+                //Debug.Log("Task is not completed yet: " + taskID);
             }
             // // Return the downloaded image data
             // yield return www.downloadHandler.data;
@@ -278,6 +329,8 @@ public class UnityMqttReceiver : MonoBehaviour
             // yield return null;
         }
     }
+
+
 
     [System.Serializable]
     public class ImageResponse

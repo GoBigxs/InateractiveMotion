@@ -39,7 +39,7 @@ public class DataManager : MonoBehaviour
             // }
         }
         else{
-            Debug.LogWarning("Data queue is empty.");
+            //Debug.LogWarning("Data queue is empty.");
             return (-1, null);
         }
     }
@@ -77,7 +77,7 @@ public class DataManager : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("Attempted to dequeue from an empty queue.");
+            //Debug.LogWarning("Attempted to dequeue from an empty queue.");
         }
     }
 
@@ -92,14 +92,18 @@ public class Data
     // public int taskID;
     public Vector2 position;
     public int size;
+    public int[] lineIDs;
+    // public Dictionary<int, int> lineIDsCnt;
  
     // Constructor
-    public Data(int userID, string side, Vector2 position, int size)
+    public Data(int userID, string side, Vector2 position, int size, int[] lineIDs)
     {
         this.userID = userID;
         this.side = side;
         this.position = position;
         this.size = size;
+        this.lineIDs = lineIDs;
+        // this.lineIDsCnt = lineIDsCnt;
         // this.taskID = taskID;
     }
 }
