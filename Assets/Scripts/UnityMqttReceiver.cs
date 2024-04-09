@@ -39,6 +39,11 @@ public class UnityMqttReceiver : MonoBehaviour
     private Pen penLeft;
     private float startTime = 0.0f;
     //private int jointArrayCount = 0;
+
+    // For server flooding problem
+    private Queue<(int taskID, Data data)> downloadQueue = new Queue<(int taskID, Data data)>();
+    private bool isDownloading = false;
+
     void Awake()
     {
 
@@ -70,12 +75,44 @@ public class UnityMqttReceiver : MonoBehaviour
             action.Invoke();
 
         }
-        // Retrieve the image  from python server via GET request
-        var (taskID, data) = DataManager.PeekFirstData();
-        //Debug.Log(taskID);
-        StartCoroutine(DownloadImage(taskID, data));
+
+        // // Retrieve the image  from python server via GET request
+        // var (taskID, data) = DataManager.PeekFirstData();
+        // //Debug.Log(taskID);
+        // StartCoroutine(DownloadImage(taskID, data));
+
+        if (!DataManager.IsDataQueueEmpty && !isDownloading)
+        {
+            var (taskID, data) = DataManager.PeekFirstData();
+            if (taskID != -1)  // -1 is an indicator of No task
+            {
+                downloadQueue.Enqueue((taskID, data));
+                if (!isDownloading)
+                {
+                    StartCoroutine(ProcessDownloadQueue());
+                }
+            }
+        }
+
 
     }
+
+    IEnumerator ProcessDownloadQueue()
+    {
+        isDownloading = true;
+
+        while (downloadQueue.Count > 0)
+        {
+            var (taskID, data) = downloadQueue.Dequeue();
+            yield return StartCoroutine(DownloadImage(taskID, data));
+            
+            // Optionally, add a slight delay between downloads to reduce server load
+            yield return new WaitForSeconds(0.1f);
+        }
+
+        isDownloading = false;
+    }
+
 
 	void Client_MqttMsgPublishReceived(object sender, MqttMsgPublishEventArgs e) 
 	{ 
@@ -232,23 +269,6 @@ public class UnityMqttReceiver : MonoBehaviour
         }
     }
 
-    private void CreateRawImage(int taskID, Data data)
-    {
-        // Find the Canvas GameObject by name
-        canvas = GameObject.Find("Canvas").GetComponent<Canvas>();
-
-        if (canvas == null || rawImagePrefab == null)
-        {
-            Debug.LogError("Canvas or RawImage prefab is not assigned!");
-            return;
-        }
-
-        // Add new RawImage for later use
-        GameObject newRawImage = Instantiate(rawImagePrefab, data.position, Quaternion.identity, canvas.transform);
-        newRawImage.name = "flowerImage_" + taskID;
-        RectTransform rawImageRect = newRawImage.GetComponent<RectTransform>();
-        rawImageRect.sizeDelta = new Vector2(data.size, data.size);
-    }
 
     private void DeleteGameObjectsByID(Data data)
     {
@@ -272,6 +292,33 @@ public class UnityMqttReceiver : MonoBehaviour
         }
     }
 
+    private void CreateRawImage(int taskID, Data data)
+    {
+        // Find the Canvas GameObject by name
+        canvas = GameObject.Find("Canvas").GetComponent<Canvas>();
+
+        if (canvas == null || rawImagePrefab == null)
+        {
+            Debug.LogError("Canvas or RawImage prefab is not assigned!");
+            return;
+        }
+
+        // Avoid duplicating same flower image due to server flooding
+        string imgName = "flowerImage_" + taskID;
+
+        GameObject imgObj = GameObject.Find(imgName);
+        if (imgObj != null)
+        {
+            Debug.Log($"Image flowerImage_{taskID} already exists");
+            return;
+        }
+
+        // Add new RawImage for later use
+        GameObject newRawImage = Instantiate(rawImagePrefab, data.position, Quaternion.identity, canvas.transform);
+        newRawImage.name = "flowerImage_" + taskID;
+        RectTransform rawImageRect = newRawImage.GetComponent<RectTransform>();
+        rawImageRect.sizeDelta = new Vector2(data.size, data.size);
+    }
 
     // Function to download image data from the server
     public IEnumerator DownloadImage(int taskID, Data data)
@@ -279,6 +326,7 @@ public class UnityMqttReceiver : MonoBehaviour
         string serverURL = "http://localhost:5000/get_image";
         // Construct the URL with the task ID as a query parameter
         string urlWithTaskID = $"{serverURL}?taskID={taskID}";
+
  
         // Create a UnityWebRequest to send the GET request
         UnityWebRequest www = UnityWebRequest.Get(urlWithTaskID);

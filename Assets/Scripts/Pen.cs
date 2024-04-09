@@ -284,7 +284,7 @@ public class Pen : MonoBehaviour
             // Send the request
             yield return request.SendWebRequest();
 
-            // Check for errors
+            // Check request response status
             if (request.result == UnityWebRequest.Result.Success)
             {
                 // Debug.Log("Data sent successfully");

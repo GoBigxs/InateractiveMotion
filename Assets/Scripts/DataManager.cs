@@ -6,6 +6,16 @@ public class DataManager : MonoBehaviour
 {
     // Queue to store dictionaries with task ID as key and data as value
     private static Queue<Dictionary<int, Data>> dataQueue = new Queue<Dictionary<int, Data>>();
+
+    public static bool IsDataQueueEmpty
+    {
+        get { return dataQueue.Count == 0; }
+    }
+
+    public static int DataQueueLength
+    {
+        get { return dataQueue.Count; }
+    }
  
     // Method to add data to the queue as a dictionary
     public static void AddData(int taskID, Data newData)
@@ -16,6 +26,8 @@ public class DataManager : MonoBehaviour
  
         // Enqueue the dictionary to the queue
         dataQueue.Enqueue(dataEntry);
+
+        Debug.Log("Task Added: " + taskID );
     }
  
     // Method to peek at the first element of the queue
@@ -43,33 +55,22 @@ public class DataManager : MonoBehaviour
             return (-1, null);
         }
     }
+
+     public static (int taskID, Data data) GetFirstData()
+     {
+        Dictionary<int, Data> dataEntry = dataQueue.Dequeue();
+        KeyValuePair<int, Data> entry = dataEntry.First();
+
+        int taskID = entry.Key;
+        Data data = entry.Value;
+        return (taskID, data);
+     }
+
+
  
     // Method to retrieve and remove data from the queue for a specific task ID
     public static void RetrieveAndRemoveData()
     {
-        // // Check if the queue is not empty
-        // if (dataQueue.Count > 0)
-        // {
-        //     // Dequeue the dictionary from the queue
-        //     Dictionary<int, Data> dataEntry = dataQueue.Dequeue();
- 
-        //     // Check if the dictionary contains the task ID
-        //     if (dataEntry.ContainsKey(taskID))
-        //     {
-        //         // Retrieve and remove the data from the dictionary
-        //         return dataEntry[taskID];
-        //     }
-        //     else
-        //     {
-        //         Debug.LogWarning("No data found for task ID: " + taskID);
-        //         return null;
-        //     }
-        // }
-        // else
-        // {
-        //     Debug.LogWarning("Data queue is empty.");
-        //     return null;
-        // }
         if (dataQueue.Count > 0)
         {
             Dictionary<int, Data> firstEntry = dataQueue.Dequeue();
@@ -77,7 +78,7 @@ public class DataManager : MonoBehaviour
         }
         else
         {
-            //Debug.LogWarning("Attempted to dequeue from an empty queue.");
+            Debug.LogWarning("Attempted to dequeue from an empty queue.");
         }
     }
 
