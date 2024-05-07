@@ -1,0 +1,67 @@
+models:
+  vae: "madebyollin/sdxl-vae-fp16-fix"
+  sd_model: "stabilityai/stable-diffusion-xl-base-1.0"
+  control_net: "diffusers/controlnet-depth-sdxl-1.0"
+
+  use_multi_loras: true
+
+  lora: "KappaNeuro/vintage-postage-stamps"
+  lora_weight: "Vintage Postage Stamps.safetensors"
+  adapter_name: "vintage"
+  adapter_weight: 0.9
+
+  lora_2: "latent-consistency/lcm-lora-sdxl"
+  lora_weight_2: "pytorch_lora_weights.safetensors"
+  adapter_name_2: "lcm"
+  adapter_weight_2: 1.0
+
+  scheduler: "LCMScheduler"
+
+pipe_param:
+  num_images_per_prompt: 1
+  num_inference_steps: 4
+  guidance_scale: 1
+  controlnet_conditioning_scale: 0.9
+  control_guidance_end: 0.7
+  lora_scale: 0.9
+  eta: 0.3
+
+content:
+  prompt: "Vintage oil painting style, purple morning glory flowers, white background, detailed"
+  negative_prompt: "blurred background, lowres, text, error, cropped, worst quality, low quality, jpeg artifacts, duplicate, morbid, mutilated, out of frame, username, watermarks, signature"
+
+
+# "vintage oil painting style petalled red roses, clean background, detailed"
+# purple morning glory flowers
+# white lily flower
+
+
+# LoRA
+# "KappaNeuro/vintage-postage-stamps", "Vintage Postage Stamps.safetensors" Vintage oil painting style, 
+# "Norod78/SDXL-HuWoof-LoRA", weight_name="SDXL_HuWoof_LoRA-000004.safetensors" HuWoof
+# "ostris/ikea-instructions-lora-sdxl", weight_name="ikea_instructions_xl_v1_5.safetensors"
+# "e-n-v-y/envy-anime-watercolor-xl-01", weight_name="EnvyAnimeWatercolorXL01.safetensors" watercolor 
+
+# Parameter settings when using MULTIPLE LoRAs (Recommended):
+# num_images_per_prompt: 1
+# num_inference_steps: 4
+# guidance_scale: 1
+# controlnet_conditioning_scale: 0.9
+# control_guidance_end: 0.7
+# eta: 0.3
+
+# Parameter settings when using SINGLE LoRAs (Recommended):
+# num_images_per_prompt: 1
+# num_inference_steps: 6
+# guidance_scale: 7.5
+# controlnet_conditioning_scale: 1.0
+# control_guidance_end: 0.8
+# lora_scale: 0.9
+
+
+
+
+
+
+
+    

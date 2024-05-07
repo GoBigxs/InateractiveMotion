@@ -1,0 +1,80 @@
+{
+    "patterns": [
+      {
+        "id": 1,
+        "func_names": ["draw_overlapping_petals"],
+        "flowers": [
+          "Pink Rose",
+          "Red Rose",
+          "Pink Peony",
+          "Red Peony",
+          "Red Begonia",
+          "White Gardenia",
+          "Red Petunia",
+          "Purple Petunia",
+          "Purple Orchid"
+        ]
+      },
+      {
+        "id": 2,
+        "func_names": ["draw_spiral", "draw_nested_spirals"],
+        "flowers": [
+          "White Yarrow",
+          "Purple Scabiosa",
+          "White Dandelion"
+        ]
+      },
+      {
+        "id": 3,
+        "func_names": ["draw_flower_with_central_pattern"],
+        "flowers": [
+          "White Daisy",
+          "Yellow Daisy",
+          "Yellow Sunflower",
+          "White Aster",
+          "Purple Aster",
+          "Purple Orchid",
+          "Purple Cosmos",
+          "Yellow Calendula"
+        ]
+      },
+      {
+        "id": 4,
+        "func_names": ["draw_rotated_layers_flower", "draw_simple_flower"],
+        "flowers": [
+          "White Lily",
+          "Pink Lily",
+          "Yellow Daffodil",
+          "White Freesia",
+          "Purple Campanula",
+          "Red Amaryllis"
+        ]
+      },
+      {
+        "id": 5,
+        "func_names": ["draw_radial_symmetry_flower"],
+        "flowers": [
+          "Red Dahlia",
+          "Yellow Dahlia",
+          "Pink Dahlia",
+          "Yellow Chrysanthemum",
+          "Pink, Yellow Carnation",
+          "Purple Cornflower",
+          "White Jasmine"
+        ]
+      },
+      {
+        "id": 6,
+        "func_names": ["draw_neiles_parabola"],
+        "flowers": [
+          "White Lily",
+          "Pink Lily",
+          "Purple Crocus",
+          "White Crocus",
+          "Yellow Crocus",
+          "Purple Morning Glory"
+        ]
+      }
+    ]
+  }
+  
