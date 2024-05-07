@@ -231,7 +231,9 @@ public class Pen : MonoBehaviour
     // Method to check if the pen is touching the paper at a certain point
     private bool IsPenTouchingPaper(Vector3 position)
     {
-        if (position.z>=1.7f)
+        Debug.Log($"{side}_ Position " + position);
+        //if (position.z>=1.8f) for old warpsquare
+        if (position.z<=-1.2f && position.z>=-1.4f)
         {
             //Debug.Log("Point " + point + " is within the desired area.");
             // Return true if the point is within the area
@@ -307,11 +309,11 @@ public class Pen : MonoBehaviour
 
                     
 
-                    Debug.Log($"New Task: {response.new_task}, Task ID: {response.task_id}, Line IDs: {string.Join(", ", response.line_ids)}, User ID: {response.user_id}, Side: {response.side}, Position: [{response.pos[0]}, {response.pos[1]}], Size: {response.size}");
+                    //Debug.Log($"New Task: {response.new_task}, Task ID: {response.task_id}, Line IDs: {string.Join(", ", response.line_ids)}, User ID: {response.user_id}, Side: {response.side}, Position: [{response.pos[0]}, {response.pos[1]}], Size: {response.size}");
                 }
                 else
                 {
-                    Debug.Log($"New Task: {response.new_task}, Task ID: {response.task_id}, Line IDs: {string.Join(", ", response.line_ids)}, User ID: {response.user_id}, Side: {response.side}, Position: null, Size: {response.size}");
+                    //Debug.Log($"New Task: {response.new_task}, Task ID: {response.task_id}, Line IDs: {string.Join(", ", response.line_ids)}, User ID: {response.user_id}, Side: {response.side}, Position: null, Size: {response.size}");
                 }
 
             }
@@ -328,9 +330,13 @@ public class Pen : MonoBehaviour
     {
         Vector3 scaledPosition = worldPosition * 100;
 
+        float scaley = scaledPosition.y + 10f;
+
+        float offset = (scaledPosition.x + 50f) * -0.08f + 235f;
+
         // Assuming your 3D world space is within a certain range, you can scale it to fit the 500x500 canvas
-        float scaledX = Mathf.InverseLerp(-250f, 250f, scaledPosition.x) * 600f;
-        float scaledY = Mathf.InverseLerp(20f, 220f, scaledPosition.y) * 270f;
+        float scaledX = Mathf.InverseLerp(-190f, -50f, scaledPosition.x) * 480f - offset;
+        float scaledY = Mathf.InverseLerp(115f, 165f, scaley) * 210f - 110f;
 
         return new Vector2(scaledX, scaledY);
     }
