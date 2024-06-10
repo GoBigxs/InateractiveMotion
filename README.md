@@ -1,6 +1,10 @@
 # MotionCanvas: Generative Motion-Driven Interactive Art Experience
 
-https://github.com/GoBigxs/InteractiveMotion/assets/48315082/d8abd31f-8dbe-42d8-b25b-60b6b0a6b8d3
+
+
+https://github.com/GoBigxs/InteractiveMotion/assets/48315082/ecb682c2-4d39-469f-90ac-9ba1a055a68c
+
+
 
 In our research, we aim to explore the potential of GenAI and motion capture in artistic interactive experiences.
 We seek to push the boundaries of artistic innovation and inspire new forms of interactive creation in the digital age.
